@@ -29,10 +29,10 @@ function useNavData() {
   const socialLinks = settings.social_links || [];
 
   useEffect(() => {
-    publicAPI.getNavPages().then(r => setNavPages(r.data || [])).catch(() => {});
+    publicAPI.getNavPages().then(r => setNavPages(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   }, []);
 
-  const headerPages = navPages.filter(p => p.show_in_header).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const headerPages = (Array.isArray(navPages) ? navPages : []).filter(p => p.show_in_header).sort((a, b) => (a.order || 0) - (b.order || 0));
 
   const handlePageClick = (page, e) => {
     if (page.login_required && !user) { e.preventDefault(); setLoginOpen(true); return; }
