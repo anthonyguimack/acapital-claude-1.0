@@ -55,8 +55,7 @@ export default function LoginModal({ open, onClose }) {
   };
 
   const handleGoogleLogin = () => {
-    const redirectUrl = window.location.origin + '/';
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
+    toast.error('Google login is not available. Please use email and password.');
   };
 
   return (

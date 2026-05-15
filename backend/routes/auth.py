@@ -75,17 +75,9 @@ async def logout(request: Request, response: Response):
 
 @router.post("/auth/session")
 async def exchange_session(request: Request, response: Response):
-    body = await request.json()
-    session_id = body.get("session_id", "")
-    if not session_id:
-        raise HTTPException(status_code=400, detail="session_id required")
-    async with httpx.AsyncClient() as http_client:
-        resp = await http_client.get(
-            "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
-            headers={"X-Session-ID": session_id})
-        if resp.status_code != 200:
-            raise HTTPException(status_code=401, detail="Invalid session")
-        data = resp.json()
+    # Google OAuth via third-party provider has been removed.
+    # Re-implement with a self-hosted OAuth flow before re-enabling this endpoint.
+    raise HTTPException(status_code=501, detail="Google login is not configured on this server")
     email = data.get("email", "").strip().lower()
     name = data.get("name", "")
     picture = data.get("picture", "")
