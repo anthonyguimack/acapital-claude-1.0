@@ -281,7 +281,7 @@ async def technical_documentation():
 <tr><td>Frontend</td><td>React 18</td><td>SPA with React Router, TailwindCSS, Shadcn/UI, Framer Motion</td></tr>
 <tr><td>Backend</td><td>FastAPI (Python)</td><td>Async REST API with Motor (async MongoDB driver)</td></tr>
 <tr><td>Database</td><td>MongoDB</td><td>Document-based NoSQL, accessed via Motor</td></tr>
-<tr><td>Auth</td><td>JWT + Google OAuth</td><td>Emergent-managed Google Auth integration</td></tr>
+<tr><td>Auth</td><td>JWT + Google OAuth</td><td>JWT sessions; Google OAuth pending self-hosted implementation</td></tr>
 <tr><td>Payments</td><td>Stripe</td><td>Test keys pre-configured</td></tr>
 <tr><td>Maps</td><td>Leaflet + React-Leaflet</td><td>Interactive maps with clustering</td></tr>
 <tr><td>Rich Text</td><td>React-Quill</td><td>WYSIWYG editor for content management</td></tr>

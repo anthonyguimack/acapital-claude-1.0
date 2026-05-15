@@ -993,7 +993,7 @@ async def generate_member_qr(request: Request, member: dict = Depends(get_curren
     The encoded URL MUST be the canonical Site URL configured in CMS →
     Settings → General. We never fall back to the request Origin or to
     the frontend-supplied `base_url` — those values are typically the
-    Emergent preview host or a cluster ingress, which would bake an
+    a local dev host or a cluster ingress, which would bake an
     impermanent URL into the QR code printed on business cards / shared
     by sponsors.  If Site URL isn't set the endpoint returns 400 so the
     operator gets an immediate, actionable error.

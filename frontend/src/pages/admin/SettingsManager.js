@@ -846,7 +846,7 @@ export default function SettingsManager() {
             <div className="space-y-3">
               {[
                 { name: 'Stripe', desc: 'Payment processing for services checkout', status: settings.stripe_configured !== false, config: 'API key configured in backend environment', category: 'Payments' },
-                { name: 'Google OAuth', desc: 'Social login via Emergent-managed Google Auth', status: true, config: 'Managed by Emergent platform', category: 'Authentication' },
+                { name: 'Google OAuth', desc: 'Social login — pending self-hosted OAuth implementation', status: false, config: 'Not configured — implement self-hosted Google OAuth to enable', category: 'Authentication' },
                 { name: 'SMTP (Email)', desc: 'Transactional emails — contact form, invitations, welcome emails', status: !!(settings.smtp_host && settings.smtp_user), config: settings.smtp_host ? `Host: ${settings.smtp_host}:${settings.smtp_port || 587}` : 'Not configured — set up in Email/SMTP tab', category: 'Email' },
                 { name: 'External Blog API', desc: 'Fetches blog posts from an external JSON endpoint', status: !!settings.blog_api_url, config: settings.blog_api_url || 'Not configured — set up in Blog API tab', category: 'Content' },
                 { name: 'Leaflet / OpenStreetMap', desc: 'Interactive maps for location display', status: true, config: 'Open-source — no API key needed', category: 'Maps' },

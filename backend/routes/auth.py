@@ -153,13 +153,8 @@ async def forgot_password(request: Request):
     settings = await db.settings.find_one({}, {"_id": 0})
     if settings and settings.get("smtp_host"):
         try:
-            # Reset URLs MUST point at the canonical Site URL. Falling back
-            # to the request Origin would put the Emergent preview host in
-            # the reset link, which (a) confuses users and (b) breaks the
-            # moment the preview URL rotates.  If Site URL isn't set we
-            # still record the token (the operator can recover via the DB
-            # or by configuring Settings and clicking "forgot" again) but
-            # we skip the email send.
+            # Reset URLs MUST point at the canonical Site URL (CMS → Settings → General).
+            # If Site URL isn't configured we still record the token but skip the email.
             from utils.runtime_config import get_site_url
             base = await get_site_url("")
             if not base:
