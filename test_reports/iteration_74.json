@@ -1,0 +1,125 @@
+{
+  "summary": "Iteration 74 - Comprehensive testing of 4 user-reported bug fixes and seed data. All 10 test scenarios passed. (1) Mentor column derivation from member_type.is_mentor verified - Corporate type members show is_mentor=False, Mentors type members show is_mentor=True. (2) Bundle detail back link uses CMS-renamed label 'Session Bundles - Offerts'. (3) Event detail back link AND breadcrumb both use CMS-renamed label 'AUX Calendar ewew'. (4) 14 members total with correct seed data. (5) 6 CMS roles exist including 4 custom roles. (6) 4 member levels with correct order. (7) CMS Manager scope correct - has Members/Settings, no Roles/Backup. (8) Mentor Coordinator scope correct - has Calendar group only. (9) Documentation page shows 5 cards including Testing Manual. (10) Regression: /my-account/login loads correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration74.py",
+    "/app/test_reports/pytest/iteration74_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Mentor column derivation correctly implemented in /api/admin/members - derives is_mentor from member_type lookup, not stored field",
+    "BundleDetail.js correctly uses sectionLabel('bundles', 'Session Bundles') for back link",
+    "EventDetail.js correctly uses sectionLabel('global-calendar', `${auxPrefix} Calendar`) for back link",
+    "MyAccountLayout.js breadcrumb correctly honours navOrderState rename for event-detail routes",
+    "DocumentationManager.js has 5 cards including Testing Manual with data-testid='doc-link-testing-manual'",
+    "CMS role-based sidebar filtering working correctly for CMS Manager and Mentor Coordinator"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (17/17 tests passed)",
+    "frontend": "100% (all 10 UI scenarios verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!",
+    "samplemember3_premium": "samplemember3@gmail.com / 123456789",
+    "samplemember9_mentor_coordinator": "samplemember9@gmail.com / 123456789",
+    "samplemember10_cms_manager": "samplemember10@gmail.com / 123456789"
+  },
+  "seed_data_creation": "Seed already run - 14 members total (admin + AUX-1/2/3 + 10 sample members AUX-101 to AUX-110)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 74 verified all 4 user-reported bug fixes: (1) Mentor column now derived from member_type.is_mentor, (2) Bundle detail back link uses CMS label, (3) Event detail back link + breadcrumb use CMS label, (4) Seed data correct with 14 members, 6 roles, 4 levels. CMS labels currently set: 'Session Bundles - Offerts' for bundles, 'AUX Calendar ewew' for global-calendar. All CMS Manager and Mentor Coordinator scope tests passed.",
+  "features_verified": {
+    "test_1_mentor_column_derivation": {
+      "status": "PASS",
+      "details": {
+        "carlos_corporate": "is_mentor=False (correct)",
+        "anthony_mentors": "is_mentor=True (correct)",
+        "samplemember1_corporate": "is_mentor=False (correct)",
+        "samplemember5_mentors": "is_mentor=True (correct)",
+        "samplemember6_mentors": "is_mentor=True (correct)",
+        "samplemember10_mentors": "is_mentor=True (correct)"
+      }
+    },
+    "test_2_bundle_detail_back_link": {
+      "status": "PASS",
+      "details": {
+        "back_link_text": "Back to Session Bundles - Offerts",
+        "uses_cms_label": true,
+        "data_testid": "back-to-bundles"
+      }
+    },
+    "test_3_event_detail_back_link_breadcrumb": {
+      "status": "PASS",
+      "details": {
+        "back_link_text": "Back to AUX Calendar ewew",
+        "breadcrumb_text": "My Account > AUX Calendar ewew",
+        "uses_cms_label": true,
+        "data_testid": "back-to-calendar"
+      }
+    },
+    "test_4_sample_member_seed": {
+      "status": "PASS",
+      "details": {
+        "total_members": 14,
+        "sample_members_exist": "AUX-101 to AUX-110 all present",
+        "default_password_works": "samplemember1@gmail.com / 123456789 login successful"
+      }
+    },
+    "test_5_roles_seed": {
+      "status": "PASS",
+      "details": {
+        "required_roles": ["role_admin", "role_member", "role_cms_manager", "role_content_editor", "role_support", "role_mentor_coordinator"],
+        "legacy_roles_removed": true
+      }
+    },
+    "test_6_levels_seed": {
+      "status": "PASS",
+      "details": {
+        "levels": ["Free (order=1)", "Standard (order=2)", "Premium (order=3)", "Mentor (order=4)"]
+      }
+    },
+    "test_7_cms_manager_scope": {
+      "status": "PASS",
+      "details": {
+        "login": "samplemember10@gmail.com / 123456789 at /admin/login",
+        "members_visible": true,
+        "settings_visible": true,
+        "roles_permissions_hidden": true,
+        "backup_hidden": true
+      }
+    },
+    "test_8_mentor_coordinator_scope": {
+      "status": "PASS",
+      "details": {
+        "login": "samplemember9@gmail.com / 123456789 at /admin/login",
+        "calendar_group_visible": ["Global Events", "Mentorship Schedule", "Mentor Slot Templates", "Blocked Dates", "Session Bundles", "Discount Coupons", "Payouts"],
+        "members_hidden": true
+      }
+    },
+    "test_9_documentation": {
+      "status": "PASS",
+      "details": {
+        "api_endpoint": "/api/docs/testing-manual returns 200",
+        "contains_required_strings": ["samplemember1", "samplemember10", "AUX-101", "AUX-110", "CMS Manager", "Mentor Coordinator", "Free", "Standard", "Premium", "Mentor"],
+        "documentation_page_cards": 5,
+        "testing_manual_card_testid": "doc-link-testing-manual"
+      }
+    },
+    "test_10_regression": {
+      "status": "PASS",
+      "details": {
+        "my_account_login_loads": true,
+        "no_errors_on_page": true
+      }
+    }
+  }
+}

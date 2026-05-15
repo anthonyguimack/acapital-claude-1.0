@@ -1,0 +1,91 @@
+{
+  "summary": "Iteration 21 Testing COMPLETED: Profile fixes including passport_id saving, profile activities, bio modal styling, iOS select fixes, and date field colorScheme. All 9 backend tests passed (100%). All frontend features verified and working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "MembershipProfile edit mode",
+        "issues": ["Console warning: In HTML, <span> cannot be a child of <option> - React hydration warning (non-blocking)"]
+      }
+    ]
+  },
+  "passed_tests": [
+    "Backend: GET /api/member/me returns passport_id field",
+    "Backend: PUT /api/member/profile with passport_id saves correctly",
+    "Backend: passport_id persists after update (verified via GET)",
+    "Backend: GET /api/member/profile-activities returns activity log",
+    "Backend: Profile update creates activity records for changed fields",
+    "Backend: Biography update creates activity records",
+    "Backend: Activity records show old_value and new_value for updates",
+    "Backend: passport_id is in allowed fields for profile update",
+    "Backend: Multiple fields including passport_id can be updated together",
+    "Frontend: Membership Profile page loads correctly",
+    "Frontend: 'ID# (Passport or DNI or etc.)' label shows in view mode",
+    "Frontend: 'ID# (Passport or DNI or etc.)' label shows in edit mode",
+    "Frontend: passport_id input field exists and is editable",
+    "Frontend: Country/State/City selects have text-base class for iOS compatibility",
+    "Frontend: Date of Birth field has colorScheme:dark style",
+    "Frontend: View Full Bio modal opens correctly",
+    "Frontend: View Full Bio modal close button (X) is visible (white on dark bg)",
+    "Frontend: View Full Bio modal has bio-rich-content class for proper heading rendering",
+    "Frontend: Activities tab shows detailed field-level changes",
+    "Frontend: Activities show 'Added' (green) and 'Updated' (gold) actions",
+    "Frontend: Activities show old_value → new_value for updates",
+    "Frontend: MyEbank page loads correctly",
+    "Frontend: MyEbank date fields (Deposit Date, Target Date) have colorScheme:dark",
+    "Frontend: MyEbank Activities tab shows field-level changes"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_iteration21_profile_fixes.py",
+    "/app/test_reports/pytest/iteration21_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Minor: React hydration warning about <span> inside <option> in select elements - cosmetic issue, does not affect functionality"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration21_profile_fixes.py"
+  ],
+  "success_rate": {
+    "backend": "100% (9/9 tests passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!"
+  },
+  "seed_data_creation": "None - used existing seeded data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 21 verified all profile fixes: (1) passport_id field saves correctly via PUT /api/member/profile - was broken before, now fixed. (2) GET /api/member/profile-activities returns detailed field-level activity log with id, field, action (added/updated), old_value, new_value, timestamp. (3) Profile updates create activity records for each changed field. (4) Biography updates create activity records. (5) 'ID# (Passport or DNI or etc.)' label shows in both view and edit modes. (6) View Full Bio modal: close button (X) visible (white) on dark bg via [&>button]:text-white class, no horizontal overflow, bio-rich-content CSS class for proper h1/h2/h3/bold/italic rendering. (7) Select elements (Country, State, City, Gender) have text-base font-size (16px) for iOS zoom prevention. (8) Date fields in both MembershipProfile and MyEbank have colorScheme:dark for proper calendar styling.",
+  "verified_features": {
+    "passport_id_fix": {
+      "endpoint": "PUT /api/member/profile",
+      "field": "passport_id",
+      "status": "FIXED - now saves correctly"
+    },
+    "profile_activities": {
+      "endpoint": "GET /api/member/profile-activities",
+      "returns": "Array of activity objects with id, field, action, old_value, new_value, timestamp",
+      "sorted_by": "timestamp descending (most recent first)"
+    },
+    "bio_modal_fixes": {
+      "close_button": "Visible (white) via [&>button]:text-white class",
+      "overflow": "overflow-x-hidden prevents horizontal scrollbar",
+      "rich_content": "bio-rich-content CSS class with h1(2rem/bold), h2(1.5rem/semibold), h3(1.25rem/medium), bold, italic styles"
+    },
+    "ios_select_fix": {
+      "class": "text-base (font-size: 16px)",
+      "style": "colorScheme: 'dark'",
+      "affected_elements": ["Country select", "State select", "City select", "Gender select"]
+    },
+    "date_field_fix": {
+      "style": "colorScheme: 'dark'",
+      "affected_pages": ["MembershipProfile (Date of Birth)", "MyEbank (Deposit Date, Target Date)"]
+    }
+  }
+}

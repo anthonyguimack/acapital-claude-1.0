@@ -1,0 +1,135 @@
+{
+  "summary": "Iteration 78 - All 10 test scenarios passed. Verified: (1) Public /public/settings excludes all sensitive keys (stripe_api_key, stripe_publishable_key, stripe_webhook_secret, smtp_password, smtp_user). (2) Admin /admin/settings returns stripe_api_key_preview (masked) and stripe_api_key_set (boolean), never raw key. (3) Admin can save/clear Stripe key, status shows test/live mode correctly. (4) site_url normalization works for all cases (bare domain, http, trailing slashes, spaces). (5) /admin/stripe-status returns configured, mode, webhook_url, site_url; non-admin gets 401/403. (6) UI Stripe tab has all elements: status badge, key input/preview, webhook URL, copy button. (7) UI Site URL field saves and normalizes correctly. (8) index.html has no Emergent/PostHog scripts. (9) Regression tests pass (admin/members, public/settings, level_free default). (10) Payments endpoint returns 503 when Stripe not configured (not 500 crash).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Settings page",
+        "issues": ["Minor React hydration warning in console for select/option elements - does not affect functionality"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration78_stripe_settings.py",
+    "/app/test_reports/pytest/iteration78_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "runtime_config.py correctly implements get_stripe_api_key with CMS → env fallback",
+    "runtime_config.py normalize_site_url handles all edge cases (bare domain, http/https, trailing slashes, spaces)",
+    "admin_content.py admin_get_settings correctly masks stripe_api_key and returns preview + set boolean",
+    "admin_content.py admin_update_settings handles stripe_api_key save/clear correctly",
+    "admin_content.py admin_stripe_status returns all required fields (configured, mode, webhook_url, site_url)",
+    "public.py correctly filters out all sensitive keys from public settings",
+    "payments.py returns 503 with friendly message when Stripe not configured",
+    "SettingsManager.js Stripe tab has all required data-testid attributes",
+    "SettingsManager.js Site URL field at top of General tab with proper normalization"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (26/26 tests passed)",
+    "frontend": "100% (all UI scenarios verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!",
+    "member": "samplemember3@gmail.com / 123456789"
+  },
+  "seed_data_creation": "None - used existing test data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 78 verified all Stripe Settings and Site URL features. Key points: (1) STRIPE_API_KEY env var is set in test pod, so clearing CMS key falls back to env (documented behavior). (2) All sensitive keys are properly filtered from public endpoints. (3) Site URL normalization adds https:// if missing, removes trailing slashes. (4) Webhook URL is auto-generated from site_url. (5) No Emergent/PostHog scripts in index.html.",
+  "features_verified": {
+    "test_1_public_settings_sensitive_keys": {
+      "status": "PASS",
+      "details": {
+        "endpoint": "GET /api/public/settings",
+        "excluded_keys": ["stripe_api_key", "stripe_publishable_key", "stripe_webhook_secret", "smtp_password", "smtp_user"],
+        "result": "All sensitive keys excluded from response"
+      }
+    },
+    "test_2_admin_settings_stripe_key_masked": {
+      "status": "PASS",
+      "details": {
+        "endpoint": "GET /api/admin/settings",
+        "has_stripe_api_key": false,
+        "has_stripe_api_key_preview": true,
+        "has_stripe_api_key_set": true,
+        "result": "Raw key never exposed, masked preview and boolean flag present"
+      }
+    },
+    "test_3_admin_settings_stripe_key_update": {
+      "status": "PASS",
+      "details": {
+        "save_test_key": "sk_test_demo123abcdefghij → mode='test'",
+        "save_live_key": "sk_live_demo123abcdefghij → mode='live'",
+        "clear_key": "Empty string clears CMS key, falls back to env if set"
+      }
+    },
+    "test_4_site_url_normalization": {
+      "status": "PASS",
+      "details": {
+        "mydomain.com": "https://mydomain.com",
+        "http://mydomain.com/": "http://mydomain.com",
+        "https://x.com//": "https://x.com",
+        "  bare.com  ": "https://bare.com",
+        "empty_string": "clears field"
+      }
+    },
+    "test_5_admin_stripe_status": {
+      "status": "PASS",
+      "details": {
+        "endpoint": "GET /api/admin/stripe-status",
+        "fields": ["configured", "mode", "webhook_url", "site_url"],
+        "webhook_url_format": "ends with /api/webhook/stripe",
+        "non_admin_access": "401/403"
+      }
+    },
+    "test_6_ui_stripe_tab": {
+      "status": "PASS",
+      "details": {
+        "tab_testid": "tab-stripe",
+        "status_badge_testid": "stripe-status-badge",
+        "key_input_testid": "stripe-key-input",
+        "key_preview_testid": "stripe-key-preview",
+        "webhook_url_testid": "stripe-webhook-url",
+        "copy_button_testid": "stripe-webhook-copy"
+      }
+    },
+    "test_7_ui_site_url_field": {
+      "status": "PASS",
+      "details": {
+        "field_testid": "settings-site-url",
+        "location": "Top of General tab",
+        "normalization": "'aws.example.com' → 'https://aws.example.com'",
+        "webhook_update": "Webhook URL updates to use saved site_url"
+      }
+    },
+    "test_8_cleanup_no_emergent_posthog": {
+      "status": "PASS",
+      "details": {
+        "checked_terms": ["assets.emergent.sh", "emergent-main.js", "debug-monitor.js", "us.i.posthog.com", "posthog.com"],
+        "result": "None found in HTML"
+      }
+    },
+    "test_9_regression_existing_endpoints": {
+      "status": "PASS",
+      "details": {
+        "admin_members": "200 OK",
+        "public_settings": "200 OK",
+        "admin_create_member_default_level": "level_free"
+      }
+    },
+    "test_10_payments_endpoint": {
+      "status": "PASS",
+      "details": {
+        "endpoint": "POST /api/payments/checkout",
+        "result": "Returns 503 when Stripe not configured (not 500 crash)"
+      }
+    }
+  }
+}

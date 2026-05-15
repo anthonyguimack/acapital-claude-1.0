@@ -1,0 +1,65 @@
+{
+  "summary": "Iteration 57 - Paid Mentor Slots Feature Testing Complete. Backend: 17/17 tests passed. Frontend: Admin Settings toggle verified, CMS Mentorship Schedule price input shows/hides correctly based on toggle state. All paid slot flows working as expected.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration57_paid_mentor_slots.py",
+    "/app/test_reports/pytest/iteration57_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_iteration57_paid_mentor_slots.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": "Admin: admin@consultant.com / Admin123!",
+  "seed_data_creation": "Test slots created and cleaned up during backend tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 57 Paid Mentor Slots feature fully tested. Key findings: 1) PUT /api/admin/settings with mentor_slots_paid_enabled persists correctly, 2) GET /api/public/settings returns mentor_slots_paid_enabled (no auth required), 3) Toggle OFF: Free booking flow works for both free and priced slots (no 402), 4) Toggle OFF: Checkout endpoint returns 400 'Paid mentorship is currently disabled', 5) Toggle ON + paid slot: Book returns 402 'Use the checkout flow', 6) Toggle ON + paid slot: Checkout creates Stripe session with URL starting https://checkout.stripe.com, creates pending_payment booking, 7) Toggle ON + free slot: Checkout returns 400 'use the free booking flow', 8) Checkout status endpoint works (returns payment_status), 9) Cancel pending_payment booking works, 10) Slot price_cents and currency persisted and returned in GET /api/admin/mentorship/slots, 11) CMS Settings page shows 'Paid Mentor Slots (Stripe)' toggle with data-testid='mentor-slots-paid-toggle', 12) CMS Mentorship Schedule slot dialog shows Price (USD) input only when toggle is ON (data-testid='slot-price-input'), 13) Regression: iCal feed works, Global Events work, Member mentor-calendar endpoint works. Toggle left OFF after testing.",
+  "features_tested": {
+    "backend_apis": {
+      "PUT /api/admin/settings (toggle ON)": "PASS - mentor_slots_paid_enabled=true persisted",
+      "PUT /api/admin/settings (toggle OFF)": "PASS - mentor_slots_paid_enabled=false persisted",
+      "GET /api/public/settings": "PASS - Returns mentor_slots_paid_enabled (no auth)",
+      "GET /api/admin/settings": "PASS - Returns mentor_slots_paid_enabled",
+      "POST /api/admin/mentorship/slots (free)": "PASS - price_cents=0 saved",
+      "POST /api/admin/mentorship/slots (paid)": "PASS - price_cents=5000, currency=usd saved",
+      "GET /api/admin/mentorship/slots": "PASS - Returns price_cents and currency fields",
+      "Toggle OFF + free slot book": "PASS - Returns 200 (not 402)",
+      "Toggle OFF + paid slot book": "PASS - Returns 200 (not 402, free flow works)",
+      "Toggle OFF + checkout": "PASS - Returns 400 'Paid mentorship is currently disabled'",
+      "Toggle ON + paid slot book": "PASS - Returns 402 'Use the checkout flow'",
+      "Toggle ON + paid slot checkout": "PASS - Returns Stripe URL and session_id",
+      "Toggle ON + free slot checkout": "PASS - Returns 400 'use the free booking flow'",
+      "GET /api/member/mentorship/checkout/status/{session_id}": "PASS - Returns payment_status",
+      "POST /api/member/mentorship/cancel/{slot_id}": "PASS - Cancels pending_payment booking",
+      "GET /api/member/ical/info": "PASS - Returns token",
+      "GET /api/ical/{token}.ics": "PASS - Returns text/calendar content"
+    },
+    "frontend_cms": {
+      "Settings page loads": "PASS - data-testid='settings-manager' found",
+      "Paid Mentor Slots toggle": "PASS - data-testid='mentor-slots-paid-toggle' found",
+      "Toggle state display": "PASS - Shows 'Disabled — bookings remain free' when OFF",
+      "Mentorship Schedule Manager": "PASS - data-testid='mentorship-schedule-manager' found",
+      "Slot dialog (toggle ON)": "PASS - Price (USD) input visible with data-testid='slot-price-input'",
+      "Slot dialog (toggle OFF)": "PASS - Price (USD) input hidden"
+    },
+    "regression_tests": {
+      "Global Events list": "PASS - 15 events returned",
+      "iCal feed": "PASS - Returns valid VCALENDAR content",
+      "Member mentor-calendar": "PASS - Endpoint works (0 slots for admin user)"
+    }
+  },
+  "stripe_integration_notes": "Stripe checkout URL generation works with test key. Actual payment completion not tested (as instructed). Checkout status endpoint returns 'pending' payment_status since no real payment was made."
+}

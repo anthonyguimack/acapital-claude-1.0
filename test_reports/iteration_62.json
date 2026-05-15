@@ -1,0 +1,115 @@
+{
+  "summary": "Iteration 62 - Strict i18n mode + 7 UI bug fixes testing. All 31 backend tests passed. All frontend features verified working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration62_strict_i18n.py",
+    "/app/test_reports/pytest/iteration62_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "i18n.js: t() now returns empty string if current locale is missing - NO cross-locale fallback (strict mode)",
+    "i18n.js: adminText() helper returns first non-empty locale for CMS item previews",
+    "i18n.js: hasAnyTranslation() helper used to conditionally render section headers",
+    "i18n.js: setLocaleValue() no longer creates _legacy keys - legacy strings dropped on first edit",
+    "aurexSchemas.js: itemPreview functions use adminText() to avoid React errors with dict objects",
+    "aurexSchemas.js: Added cta_new_tab to aurex_audience + aurex_pricing; view_all_new_tab to aurex_team + aurex_events",
+    "AurexSections.js: Removed all hardcoded default fallbacks ('Our Services', 'Testimonials', etc)",
+    "AurexSections.js: All buttons use rounded-sm (border-radius: 0px) - rectangular style",
+    "AurexSections.js: Testimonials photo uses t.image || t.avatar; role uses tt(t.title) || tt(t.role)",
+    "AurexSections.js: AurexServicesMono only wraps card in <a> when s.external_url is set",
+    "AurexSectionsManager.js: item list wraps item.description and item.badge with adminText()"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration62_strict_i18n.py"
+  ],
+  "success_rate": {
+    "backend": "100% (31/31 tests passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!"
+  },
+  "seed_data_creation": "aurex_audience config seeded with {title: {en: 'Only English Title', es: ''}} to test strict i18n",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 62 verified all 8 user feedback fixes: (1) Video section no _legacy fallback, (2) Open-in-new-window fields working, (3) Strict i18n mode - empty locale shows nothing, (4) FR bug fixed - /admin/aurex-sections loads without React error, (5) AurexSectionsManager item list uses adminText(), (6) Rectangular buttons (border-radius: 0px), (7) Services cards not clickable without external_url, (8) Testimonials show photo + name + role correctly.",
+  "features_tested": {
+    "backend": [
+      "GET /api/public/settings returns languages=['en','es'] and default_language",
+      "PUT /api/admin/aurex/{section}/config accepts and persists localized dict values with cta_new_tab",
+      "GET /api/public/aurex/{section} returns config with localized values",
+      "cta_new_tab field persisted for aurex_audience, aurex_pricing items",
+      "view_all_new_tab field persisted for aurex_team, aurex_events",
+      "All 13 Aurex public endpoints return 200 with config",
+      "GET /api/public/testimonials returns testimonials with image/avatar field",
+      "GET /api/public/services returns services with external_url field",
+      "Video config accepts empty title/subtitle",
+      "Section config headers (eyebrow/title/subtitle) accept localized values",
+      "Strict i18n: config with {en: 'value', es: ''} stored correctly",
+      "FR language support: item with FR-only title created and retrieved without error"
+    ],
+    "frontend": [
+      "/admin/aurex-sections loads without React 'Objects are not valid as a React child' error",
+      "AurexSectionsManager tabs visible and functional",
+      "LocalizedField shows EN/ES tabs for text fields",
+      "'Open CTA in new window' checkbox visible and enabled",
+      "Language switcher visible with EN/ES options",
+      "Language switcher toggles correctly between EN and ES",
+      "Testimonials section shows photos (image || avatar)",
+      "Testimonials show author name and role below name",
+      "Audience CTA button has border-radius: 0px (rectangular)",
+      "Contact submit button has border-radius: 0px",
+      "Team view-all button has border-radius: 0px",
+      "Pricing CTA buttons have border-radius: 0px",
+      "Events buttons have border-radius: 0px",
+      "Services card without external_url is <div> (not clickable)",
+      "Services card with external_url is <a> (clickable)",
+      "Video section does NOT contain '_legacy' text",
+      "Services section uses CMS config (not hardcoded defaults)",
+      "Strict i18n: ES locale empty shows nothing (no EN fallback)",
+      "Section header hidden when title/subtitle empty in current locale"
+    ]
+  },
+  "bugs_verified_fixed": [
+    {
+      "issue": "Video section showing '_legacy' fallback text",
+      "status": "FIXED - Video section does NOT contain '_legacy' text"
+    },
+    {
+      "issue": "Missing 'Open in new window' for Aurex section buttons",
+      "status": "FIXED - cta_new_tab and view_all_new_tab fields working"
+    },
+    {
+      "issue": "Section config showing EN fallback in ES locale",
+      "status": "FIXED - Strict i18n mode returns empty string, section header hidden"
+    },
+    {
+      "issue": "FR language causing React error in /admin/aurex-sections",
+      "status": "FIXED - Page loads without error, adminText() handles dict objects"
+    },
+    {
+      "issue": "Testimonials photos missing (image vs avatar mismatch)",
+      "status": "FIXED - Uses t.image || t.avatar"
+    },
+    {
+      "issue": "Buttons not rectangular (should be border-radius 0)",
+      "status": "FIXED - All buttons use rounded-sm (0px border-radius)"
+    },
+    {
+      "issue": "Services cards clickable without external_url",
+      "status": "FIXED - Cards without external_url render as <div> (not clickable)"
+    },
+    {
+      "issue": "Testimonials Role field not displaying below Author Name",
+      "status": "FIXED - Role uses tt(t.title) || tt(t.role) and displays below name"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "summary": "Iteration 23 Testing COMPLETED: Theme Engine and HomePage.js rewrite verification. All 22 backend tests passed (100%). Fixed a bug where Map section wasn't rendering due to sectionMap key mismatch ('locations' vs 'map'). All homepage sections now render correctly with Classic theme styling.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "passed_tests": [
+    "Backend: GET /api/public/settings returns active_theme field",
+    "Backend: GET /api/public/settings returns theme_colors object",
+    "Backend: GET /api/public/settings returns sections config",
+    "Backend: GET /api/public/about returns about data",
+    "Backend: GET /api/public/services returns services array",
+    "Backend: GET /api/public/blog returns blog posts",
+    "Backend: GET /api/public/books returns books array",
+    "Backend: GET /api/public/maps returns maps array",
+    "Backend: GET /api/public/map-locations returns locations with lat/lng",
+    "Backend: GET /api/public/portfolio returns portfolio items",
+    "Backend: GET /api/public/gallery returns gallery items",
+    "Backend: GET /api/public/testimonials returns testimonials",
+    "Backend: GET /api/public/hero-slides returns hero slides",
+    "Backend: GET /api/public/nav-pages returns navigation pages",
+    "Backend: GET /api/blog/latest returns external blog posts",
+    "Backend: POST /api/contact submits contact form successfully",
+    "Backend: POST /api/auth/login with admin credentials returns token",
+    "Backend: GET /api/admin/settings returns settings with active_theme",
+    "Backend: PUT /api/admin/settings can update active_theme to 'modern'",
+    "Backend: PUT /api/admin/settings can update active_theme to 'classic'",
+    "Backend: PUT /api/admin/settings can update active_theme to 'default'",
+    "Backend: Theme changes persist correctly",
+    "Frontend: Homepage loads with Classic theme styling",
+    "Frontend: About section renders with Classic bordered card layout",
+    "Frontend: Services section renders with Classic bordered cards",
+    "Frontend: News section displays internal blog posts",
+    "Frontend: External Blog section fetches from external API",
+    "Frontend: Reading List section shows books",
+    "Frontend: Map/Locations section renders with Leaflet map (FIXED)",
+    "Frontend: Portfolio section displays featured projects",
+    "Frontend: Gallery section displays images correctly",
+    "Frontend: Testimonials section renders without crashes (React hooks bug was fixed)",
+    "Frontend: Contact section has working form",
+    "Frontend: Contact form submission works",
+    "Frontend: Footer renders with Classic theme layout",
+    "Frontend: Navbar renders correctly on all pages",
+    "Frontend: Hero-less pages (e.g., /membership_services) have solid navbar background - no white-on-white text",
+    "Frontend: Admin login works with admin@consultant.com / Admin123!",
+    "Frontend: Admin Settings page has all 9 tabs (General, Colors, Themes, Sections, Social Links, Email/SMTP, Blog API, Membership, APIs)",
+    "Frontend: Themes tab shows 3 theme cards (Default, Modern, Classic) with visual previews",
+    "Frontend: Classic theme is currently active with checkmark indicator",
+    "Frontend: News page displays blog posts with categories",
+    "Frontend: Gallery page displays images with category filters",
+    "Frontend: Reading List page shows books with quote header"
+  ],
+  "bug_fixed": {
+    "file": "/app/frontend/src/pages/HomePage.js",
+    "issue": "Map section not rendering because sectionMap used 'locations' key but section_order from database uses 'map' key",
+    "fix": "Added both 'map' and 'locations' keys to sectionMap pointing to MapSection component",
+    "line_changed": "547-559"
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration23_theme_homepage.py",
+    "/app/test_reports/pytest/iteration23_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/frontend/src/pages/HomePage.js",
+    "/app/backend/tests/test_iteration23_theme_homepage.py"
+  ],
+  "success_rate": {
+    "backend": "100% (22/22 tests passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!"
+  },
+  "seed_data_creation": "None - used existing seeded data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 23 verified the massive HomePage.js rewrite with theme-specific layouts. Key findings: (1) All homepage sections render correctly with Classic theme: About (bordered card), Services (bordered cards), News (internal blog), Blog (external API), Reading List, Map/Locations (Leaflet with markers), Portfolio, Gallery, Testimonials, Contact. (2) Fixed bug: Map section wasn't rendering because sectionMap key was 'locations' but section_order uses 'map' - added both keys to sectionMap. (3) Navbar hero-less detection works - pages without hero get solid background navbar (no white-on-white text). (4) Admin Settings > Themes tab shows 3 theme cards with visual previews. (5) Theme switching via API works (tested modern, classic, default). (6) External blog API proxy at /api/blog/latest fetches from configured blog_api_url. (7) Contact form submission works. (8) All 22 backend API tests passed.",
+  "verified_features": {
+    "theme_engine": {
+      "themes": ["default", "modern", "classic"],
+      "current_active": "classic",
+      "admin_location": "Settings > Themes tab",
+      "storage": "settings.active_theme in MongoDB"
+    },
+    "homepage_sections": {
+      "about": "Classic: bordered card with cream background, serif fonts",
+      "services": "Classic: bordered cards with teal accent underlines",
+      "news": "Internal blog posts from /api/public/blog",
+      "blog": "External blog from /api/blog/latest (proxied)",
+      "reading_list": "Books with cover images",
+      "map": "Leaflet map with marker clustering (FIXED - was not rendering)",
+      "portfolio": "Featured projects with bordered cards",
+      "gallery": "Image grid with hover effects",
+      "testimonials": "Quote cards with ratings",
+      "contact": "Form with bordered Classic styling"
+    },
+    "navbar_hero_detection": {
+      "description": "ModernNavbar detects if page has hero section via MutationObserver",
+      "hero_pages": "Transparent navbar that becomes solid on scroll",
+      "heroless_pages": "Solid background navbar immediately (e.g., /membership_services)"
+    }
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "brand_identity": {
+    "name": "Legacy",
+    "archetype": "The Performance Pro / Consultant",
+    "emotional_tone": "Trust, Authority, Wisdom, Precision, Strategic",
+    "visual_style": "High-Contrast Professional, Deep Navy Anchors, Teal Energy",
+    "description": "A premium consultancy firm offering strategic wisdom and legacy-building services. The design must feel established yet modern."
+  },
+  "design_system": {
+    "colors": {
+      "palette": {
+        "primary": {
+          "hex": "#1a2332",
+          "name": "Legacy Navy",
+          "usage": "Main anchor, Footer, Headings, Primary Buttons",
+          "tailwind_var": "--primary"
+        },
+        "secondary": {
+          "hex": "#F8FAFC",
+          "name": "Slate Mist",
+          "usage": "Page Backgrounds, Card Backgrounds",
+          "tailwind_var": "--background"
+        },
+        "accent": {
+          "hex": "#0D9488",
+          "name": "Strategic Teal",
+          "usage": "Call to Actions, Highlights, Icons, Progress Bars",
+          "tailwind_var": "--accent"
+        },
+        "neutral": {
+          "hex": "#64748B",
+          "name": "Professional Grey",
+          "usage": "Body Text, Subtitles",
+          "tailwind_var": "--muted-foreground"
+        },
+        "surface": {
+          "hex": "#FFFFFF",
+          "name": "Pure White",
+          "usage": "Cards, Content Areas",
+          "tailwind_var": "--card"
+        }
+      },
+      "gradients": {
+        "hero_overlay": "linear-gradient(to right, rgba(26, 35, 50, 0.95), rgba(26, 35, 50, 0.7))",
+        "teal_glow": "radial-gradient(circle at center, rgba(13, 148, 136, 0.15), transparent 70%)"
+      }
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Playfair Display, serif",
+        "body": "Manrope, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "imports": [
+        "@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');"
+      ],
+      "scale": {
+        "h1": "text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight",
+        "h2": "text-4xl md:text-5xl font-semibold tracking-tight",
+        "h3": "text-2xl md:text-3xl font-medium",
+        "body_lg": "text-lg md:text-xl leading-relaxed",
+        "body_base": "text-base leading-relaxed text-slate-600",
+        "caption": "text-sm uppercase tracking-widest font-semibold text-teal-600"
+      }
+    },
+    "spacing": {
+      "container": "max-w-7xl mx-auto px-6 md:px-12",
+      "section_vertical": "py-20 md:py-32",
+      "card_padding": "p-8 md:p-10",
+      "element_gap": "gap-8"
+    },
+    "visual_enhancers": {
+      "radius": "rounded-sm",
+      "shadows": {
+        "card": "shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]",
+        "float": "shadow-[0_20px_50px_-12px_rgba(26,35,50,0.25)]"
+      },
+      "borders": "border border-slate-200"
+    }
+  },
+  "assets": {
+    "images": {
+      "hero": {
+        "url": "https://images.unsplash.com/photo-1650784854430-3ab0c30afdf3?crop=entropy&cs=srgb&fm=jpg&q=85",
+        "alt": "Confident professional consultant in white coat",
+        "category": "hero"
+      },
+      "about": {
+        "url": "https://images.pexels.com/photos/7433919/pexels-photo-7433919.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Strategic business meeting",
+        "category": "about"
+      },
+      "services": [
+        {
+          "url": "https://images.unsplash.com/photo-1762341950661-36a6f230cb6a?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Corporate architecture representing structure",
+          "category": "service_bg"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1764866558095-3be59831f45f?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Night city skyline representing vision",
+          "category": "service_bg"
+        }
+      ],
+      "gallery": [
+        {
+          "url": "https://images.unsplash.com/photo-1771147372627-7fffe86cf00b?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Conference room strategy",
+          "category": "gallery_professional"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1758518727707-b023e285b709?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Team discussion",
+          "category": "gallery_professional"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1758518729685-f88df7890776?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Professional meeting",
+          "category": "gallery_professional"
+        },
+        {
+          "url": "https://images.pexels.com/photos/7794060/pexels-photo-7794060.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+          "alt": "Diverse team meeting",
+          "category": "gallery_personal"
+        }
+      ],
+      "reading_list": [
+        {
+          "url": "https://images.unsplash.com/photo-1543320996-542b8a0e022c?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Minimal book cover",
+          "category": "book"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1695634621295-8f83685a35bb?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Open book on desk",
+          "category": "book"
+        }
+      ],
+      "testimonials": [
+        {
+          "url": "https://images.unsplash.com/photo-1755519024827-fd05075a7200?crop=entropy&cs=srgb&fm=jpg&q=85",
+          "alt": "Client portrait",
+          "category": "headshot"
+        },
+        {
+          "url": "https://images.pexels.com/photos/29852895/pexels-photo-29852895.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+          "alt": "Client portrait",
+          "category": "headshot"
+        },
+        {
+          "url": "https://images.pexels.com/photos/30004360/pexels-photo-30004360.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+          "alt": "Team portrait",
+          "category": "headshot"
+        }
+      ]
+    },
+    "icons": {
+      "library": "lucide-react",
+      "style": "Stroke width 1.5px, crisp edges"
+    }
+  },
+  "component_guidelines": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-teal-700 rounded-sm px-8 py-3 font-medium transition-all shadow-lg hover:shadow-xl",
+      "secondary": "bg-white text-primary border border-primary/10 hover:bg-slate-50 rounded-sm px-8 py-3 font-medium transition-all",
+      "ghost": "text-primary hover:text-teal-700 hover:bg-teal-50/50"
+    },
+    "cards": {
+      "feature": "bg-white p-8 rounded-sm border border-slate-100 shadow-card hover:border-teal-100 hover:shadow-float transition-all duration-300 group",
+      "pricing": "bg-white p-10 rounded-sm border-t-4 border-teal-600 shadow-card relative overflow-hidden"
+    },
+    "inputs": {
+      "default": "bg-slate-50 border-slate-200 focus:border-teal-500 focus:ring-teal-500/20 rounded-sm"
+    }
+  },
+  "layout_strategies": {
+    "public_pages": {
+      "hero": "Split layout: Text Left (60%) + Image Right (40%) with overlapping elements. Use deep navy background for Hero.",
+      "services": "Grid 3-col. Cards with large icons (48px) in Teal. Hover state lifts card.",
+      "gallery": "Masonry Layout using columns-1 md:columns-2 lg:columns-3 gap-8. Images have distinct hover overlay with details.",
+      "map": "Full width container h-[500px] using Leaflet. Custom marker styles in Teal.",
+      "footer": "Dark Navy background (#1a2332). White text. 4 Column grid. 'Get Updates' section prominent."
+    },
+    "admin_dashboard": {
+      "structure": "Sidebar Left (Fixed, Navy) + Content Right (Fluid, Light Grey).",
+      "grid": "Bento Grid Mode B (High Density).",
+      "tables": "Clean rows, alternating stripe (slate-50), distinct headers."
+    }
+  },
+  "functionality_specs": {
+    "map": "Use 'react-leaflet'. Center on a major business hub. Custom markers.",
+    "stripe": "Integrate Stripe Elements for 'Services' and 'Products' checkout. Use test mode keys.",
+    "auth": "JWT based. Login page should be minimal: Navy background left, White form right.",
+    "cms": "Admin panel must edit: Hero Text, About Content, Services List, Blog Posts. Use forms with 'react-hook-form'."
+  },
+  "universal_guidelines": [
+    "Use 'Playfair Display' for all Headings (H1-H3). Use 'Manrope' for body.",
+    "Primary Color is Navy (#1a2332). Accent is Teal (#0D9488). Avoid generic blue.",
+    "No gradients on text. Use gradients only for subtle background glows.",
+    "Buttons must be 'rounded-sm' (sharp corners) to feel professional/legacy.",
+    "Use 2x padding. If you think 'p-4' is enough, use 'p-8'. Consultant sites need breathing room.",
+    "Animations: Use 'framer-motion' for simple fade-ins on scroll. Do not over-animate.",
+    "Images: Use the provided URLs. Do not leave empty src tags.",
+    "Test IDs: Add data-testid to all interactive elements."
+  ],
+  "instructions_to_main_agent": "You are building 'Legacy'. This is not a startup; it is an established consultancy. Design must reflect stability. 1. Install 'lucide-react', 'framer-motion', 'clsx', 'tailwind-merge', 'react-leaflet', 'leaflet'. 2. Create the 'design_guidelines.json' first (done). 3. Set up the Tailwind config to use the Navy/Teal/Slate palette. 4. Build components with the 'rounded-sm' radius. 5. Ensure the Admin panel is distinct from the public site (Dense vs Spacious)."
+}

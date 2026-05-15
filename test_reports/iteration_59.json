@@ -1,0 +1,79 @@
+{
+  "summary": "Iteration 59 - Discount Coupons feature + Bug fixes. All 17 backend tests passed. Frontend UI verified for admin coupons CRUD, member bundles with banners/summary HTML, my-bookings billing column, global calendar monthly view, and admin dialog light color scheme.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration59_coupons.py",
+    "/app/test_reports/pytest/iteration59_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "coupons.py: _clean_body correctly validates discount_type (percent/flat), clamps percent 0-100, stores flat in cents",
+    "coupons.py: member_validate checks active, expired, applies_to context, and usage limits (total vs per_member)",
+    "mentor_slots.py: checkout endpoint accepts coupon_code, validates, computes discount, handles zero_priced case",
+    "bundles.py: checkout endpoint accepts coupon_code with same validation pattern",
+    "mentor_slots.py: my_bookings endpoint enriches with billing_type (free/paid/credit), price_cents, currency",
+    "MentorshipProfile.js: stripHtml uses DOM decoder (line 14) to fix HTML entity display",
+    "GlobalCalendar.js: MonthView now receives year, month, monthLabel props (line 224-232)",
+    "index.css: :has() scoped dialog color-scheme rule (line 417-427) fixes admin dialog native controls",
+    "BundleDetail.js: max-w-full overflow-x-hidden on root (line 50) prevents horizontal scroll",
+    "AdminCouponsManager.js: Full CRUD UI with all required fields (code, discount_type, value, applies_to, usage_mode, limit, expires, active)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration59_coupons.py"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!",
+    "member": "carlos@example.com / Mentor123!"
+  },
+  "seed_data_creation": "Test coupons created and cleaned up during tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 59 features verified: (1) Admin coupon CRUD at /admin/calendar/coupons works with all fields, (2) Member coupon validation endpoint returns correct discount_cents/final_cents, (3) Duplicate code creation returns 400, (4) Percent clamped 0-100, flat stored in cents, (5) Inactive/expired/wrong-context coupons return 400, (6) My Bookings has Billing column with free/paid/credit badges, (7) Global Calendar monthly view renders 7-col grid with day numbers, (8) Bundle cards show banner images and summary as HTML, (9) Bundle detail has overflow constraints (no horizontal scroll), (10) Admin New Event dialog has light color-scheme for native controls. Note: carlos@example.com has no mentor assigned so coupon input in booking dialog could not be tested via UI, but backend coupon validation is fully tested.",
+  "features_tested": {
+    "backend": [
+      "POST /api/admin/coupons - create percent coupon",
+      "POST /api/admin/coupons - create flat coupon (value in cents)",
+      "POST /api/admin/coupons - percent clamped to 0-100",
+      "POST /api/admin/coupons - duplicate code returns 400",
+      "GET /api/admin/coupons - list all coupons",
+      "PUT /api/admin/coupons/{id} - update coupon",
+      "DELETE /api/admin/coupons/{id} - delete coupon",
+      "DELETE /api/admin/coupons/{id} - nonexistent returns 404",
+      "POST /api/member/coupons/validate - percent discount calculation",
+      "POST /api/member/coupons/validate - invalid code returns 404",
+      "POST /api/member/coupons/validate - wrong context returns 400",
+      "POST /api/member/coupons/validate - inactive coupon returns 400",
+      "POST /api/member/coupons/validate - expired coupon returns 400",
+      "POST /api/member/coupons/validate - flat discount calculation",
+      "POST /api/member/coupons/validate - flat discount capped at amount",
+      "GET /api/member/my-bookings - returns billing_type, price_cents, currency"
+    ],
+    "frontend": [
+      "Admin sidebar shows 'Discount Coupons' under Calendar section",
+      "Admin /admin/calendar/coupons - Coupons Manager page loads",
+      "Admin coupon dialog has all fields: code, discount_type radios, value, applies_to radios, usage_mode radios, limit, expires, active",
+      "Member /my-account/my-bookings - Billing column header visible",
+      "Member /my-account/global-calendar - Monthly view renders 7-col grid",
+      "Member /my-account/global-calendar - Day numbers visible (30 days)",
+      "Member /my-account/global-calendar - Prev/Next month buttons work",
+      "Member /my-account/bundles - Bundle cards show banner images",
+      "Member /my-account/bundles - Summary rendered as HTML",
+      "Member /my-account/bundles/:id - Detail page has overflow-x: hidden",
+      "Member /my-account/bundles/:id - Description has rich-text-content wrapper",
+      "Admin /admin/calendar/global - New Event dialog has color-scheme: light",
+      "Admin New Event dialog - Native selects have light background"
+    ]
+  }
+}

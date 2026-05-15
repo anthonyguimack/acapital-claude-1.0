@@ -1,0 +1,81 @@
+{
+  "summary": "Iteration 41: Tested Maps Module Enhancements - MapBlock crash fix, hardcoded target='_blank' fix, Maps Language setting, and interactive Map Picker. All 11 backend tests passed. Frontend verified via Playwright - all 9 features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration41.py",
+    "/app/test_reports/pytest/iteration41_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "BlockRenderer.js: MapBlock component now uses direct imports instead of React.lazy (lines 7-9) - fixes crash when rendering map blocks on dynamic pages",
+    "HomePage.js: MapSection popup links now use loc.open_in_new_tab setting (line 309) instead of hardcoded target='_blank'",
+    "SettingsManager.js: Maps Language dropdown added in General tab (lines 193-200) with MAP_LANGUAGES from mapConfig.js",
+    "MapsManager.js: Interactive Map Picker with ClickableMap component (lines 22-29, 143-151) allows click-to-set coordinates",
+    "mapConfig.js: Centralized tile URL configuration with getTileUrl() and getTileAttribution() functions, MAP_LANGUAGES export",
+    "MapTypePage.js: Uses getTileUrl(lang) from mapConfig.js for tile provider (line 62)",
+    "PortfolioManager.js: open_in_new_tab toggle visible when link is entered (lines 61-65)",
+    "FeaturedProjectsPage.js: Project links respect open_in_new_tab setting (lines 32, 46)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration41.py"
+  ],
+  "success_rate": {
+    "backend": "100% (11/11 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": "admin@consultant.com / Admin123!",
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All features verified: (1) Admin login works with admin@consultant.com / Admin123!. (2) Settings > General tab has 'Maps Language' dropdown with 11 language options (Local, English, Spanish, etc.). (3) Maps Manager > New Location dialog shows interactive Leaflet map picker below lat/lng fields. (4) 'Our Group' page renders 2 map blocks without crashes. (5) Homepage map sections render correctly with tile provider from settings. (6) Homepage map popup links respect open_in_new_tab setting (target='_self' when false). (7) Portfolio items on homepage and /featured-projects respect open_in_new_tab. (8) /conferences and /recommended_sites pages render maps with correct tiles. (9) Portfolio Manager shows 'Open link in new tab' toggle when link is entered.",
+  "features_verified": {
+    "admin_login": {
+      "status": "PASS",
+      "details": "Admin login with admin@consultant.com / Admin123! works correctly"
+    },
+    "maps_language_dropdown": {
+      "status": "PASS",
+      "details": "Settings > General tab has Maps Language dropdown with 11 options, current value: 'local'"
+    },
+    "map_picker_in_maps_manager": {
+      "status": "PASS",
+      "details": "New Location dialog shows interactive Leaflet map with 'Click the map to set coordinates' instruction"
+    },
+    "our_group_page_map_blocks": {
+      "status": "PASS",
+      "details": "Our Group page (/our_group) renders 2 map blocks without crashes"
+    },
+    "homepage_map_sections": {
+      "status": "PASS",
+      "details": "Homepage shows Global Business Presence and Conferences map sections with correct tiles"
+    },
+    "homepage_map_popup_links": {
+      "status": "PASS",
+      "details": "Map popup links have target='_self' (respects open_in_new_tab setting, not hardcoded to _blank)"
+    },
+    "portfolio_open_in_new_tab": {
+      "status": "PASS",
+      "details": "Featured Projects page shows project links with target='_self' (respects open_in_new_tab)"
+    },
+    "conferences_page": {
+      "status": "PASS",
+      "details": "/conferences page renders with Leaflet map showing Tokyo Center location"
+    },
+    "recommended_sites_page": {
+      "status": "PASS",
+      "details": "/recommended_sites page renders with Leaflet map showing Lima location"
+    },
+    "portfolio_manager_toggle": {
+      "status": "PASS",
+      "details": "Portfolio Manager edit dialog shows 'Open link in new tab' toggle when link is entered"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "summary": "Iteration 58 - Multi-batch fixes: CMS Settings toggles, Bundle features, Document upload, Paid slots. All 16 backend tests passed. Frontend UI verified for admin settings toggles, MentorshipCalendar template select, and BundlesBrowse/BundleDetail pages.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "BundlesBrowse",
+        "issues": ["Existing bundles don't have banner_url set - banners not displayed (expected for old data)"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration58_bundles_settings.py",
+    "/app/test_reports/pytest/iteration58_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "MentorshipProfile.js correctly uses stripHtml() for card display (line 62) and dangerouslySetInnerHTML for dialog (line 332)",
+    "bundles.py correctly handles summary and banner_url fields in _clean_bundle_body (lines 24-26)",
+    "paid_bundles_enabled gate implemented with fallback to mentor_slots_paid_enabled (lines 187-191)",
+    "MentorshipCalendar.js template select uses controlled state via appliedTemplateId - retains selected value correctly"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration58_bundles_settings.py"
+  ],
+  "success_rate": {
+    "backend": "100% (16/16 tests passed)",
+    "frontend": "100% (all UI elements verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!",
+    "member": "carlos@example.com / Mentor123!"
+  },
+  "seed_data_creation": "Test bundles created and cleaned up during tests",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All iteration 58 features verified: (1) paid_bundles_enabled toggle works independently from mentor_slots_paid_enabled, (2) my_account_color_scheme radio works, (3) Bundle CRUD with summary/banner_url fields works, (4) Member bundle endpoints return summary/banner_url/mentor_name, (5) .docx upload works with both MIME types, (6) Paid mentorship checkout returns Stripe URL, (7) MentorshipCalendar template select retains value and pre-fills fields, (8) BundlesBrowse shows Read more links, (9) BundleDetail shows price/sessions/description. Note: MentorshipProfile HTML rendering fix verified in code - carlos@example.com has no mentor assigned so no slots to display.",
+  "features_tested": {
+    "backend": [
+      "GET /api/public/settings returns paid_bundles_enabled and my_account_color_scheme",
+      "Admin toggle paid_bundles_enabled independently via PUT /api/admin/settings",
+      "Admin toggle my_account_color_scheme via PUT /api/admin/settings",
+      "POST /api/member/bundles/checkout/{id} returns 400 when paid_bundles_enabled=false",
+      "POST /api/member/bundles/checkout/{id} returns Stripe URL when paid_bundles_enabled=true",
+      "Admin bundle CRUD (POST/PUT/GET/DELETE /api/admin/bundles) with summary and banner_url",
+      "GET /api/member/bundles returns list with summary and banner_url",
+      "GET /api/member/bundles/{id} returns full bundle with mentor_name",
+      "POST /api/member/upload-file accepts .docx with application/octet-stream",
+      "POST /api/member/upload-file accepts .docx with correct MIME type",
+      "POST /api/member/mentorship/checkout/{slot_id} returns Stripe URL"
+    ],
+    "frontend": [
+      "Admin Settings → General shows mentor-slots-paid-toggle (data-testid verified)",
+      "Admin Settings → General shows paid-bundles-toggle (data-testid verified)",
+      "Admin Settings → General shows my-account-color-scheme radio (data-testid verified)",
+      "Admin Settings → General shows ma-scheme-dark and ma-scheme-light radios (data-testid verified)",
+      "MentorshipCalendar Add Slot dialog shows slot-apply-template select",
+      "MentorshipCalendar template select retains selected value after change",
+      "MentorshipCalendar template pre-fills Title, Virtual Link, Description fields",
+      "BundlesBrowse shows bundle cards with price, sessions, savings",
+      "BundlesBrowse shows Read more links (data-testid^='bundle-read-more-')",
+      "BundleDetail shows price stat card, sessions stat card, description"
+    ]
+  }
+}

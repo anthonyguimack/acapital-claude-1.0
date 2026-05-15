@@ -1,0 +1,117 @@
+{
+  "summary": "Iteration 15 Testing COMPLETED: Hero slides per-page assignment and custom page rendering verified. Fixed missing useMemo import in HomePage.js. Backend 20/20 tests passed. Frontend features working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "fixed_issues": [
+      {
+        "component": "HomePage.js",
+        "issue": "Missing useMemo import causing 'useMemo is not defined' error",
+        "fix": "Added useMemo to React import statement",
+        "file": "/app/frontend/src/pages/HomePage.js"
+      }
+    ]
+  },
+  "passed_tests": [
+    "Backend: GET /api/public/hero-slides returns all active slides",
+    "Backend: GET /api/public/hero-slides?page=home returns slides assigned to home",
+    "Backend: GET /api/public/hero-slides?page=news returns slides assigned to news",
+    "Backend: GET /api/public/hero-slides?page=gallery returns slides assigned to gallery",
+    "Backend: GET /api/public/hero-slides?page=nonexistent returns empty list",
+    "Backend: GET /api/public/site-pages returns system + custom pages",
+    "Backend: GET /api/public/nav-pages returns all nav pages",
+    "Backend: KLS page exists in nav_pages with url=/kls",
+    "Backend: Terms page has login_required=true",
+    "Backend: Privacy page has login_required=false",
+    "Backend: Hero slides assigned to KLS page ID",
+    "Backend: Admin login with admin@consultant.com / Admin123!",
+    "Backend: Wrong password correctly rejected with 401",
+    "Backend: GET /api/admin/hero-slides returns all slides",
+    "Backend: GET /api/admin/nav-pages returns all nav pages",
+    "Backend: GET /api/public/hero returns 200",
+    "Backend: GET /api/public/about returns 200",
+    "Backend: GET /api/public/services returns 200",
+    "Backend: GET /api/public/sections returns 200",
+    "Backend: GET /api/public/testimonials returns 200",
+    "Frontend: Homepage loads with hero section (3 slides)",
+    "Frontend: KLS page (/kls) renders with hero slider and page content",
+    "Frontend: KLS page shows 'summary de prueba' and 'content de prueba'",
+    "Frontend: News page (/news) shows hero slides (2 dots for 2 slides)",
+    "Frontend: Gallery page (/gallery) shows hero slide",
+    "Frontend: Terms page (/terms) shows Login Required screen when not logged in",
+    "Frontend: Terms page has 'Login to Continue' button",
+    "Frontend: Privacy page (/privacy) loads for unauthenticated users",
+    "Frontend: Unknown URL (/nonexistent) shows 404 page",
+    "Frontend: Admin login works with admin@consultant.com / Admin123!",
+    "Frontend: Admin Pages Manager loads with Custom Pages (3) and System Pages (4) tabs",
+    "Frontend: System Pages tab shows Home, News, Gallery, Reading List",
+    "Frontend: Hero Slide Form has Page Assignment section",
+    "Frontend: Page Assignment shows checkboxes for Home, News, Gallery, Reading List, Terms, Privacy, KLS"
+  ],
+  "test_report_links": [
+    "/app/backend/tests/test_iteration15_features.py",
+    "/app/test_reports/pytest/iteration15_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Console warnings about HTML hydration errors (span inside tbody/select/option) - these are from Emergent's development tooling and don't affect production"
+  ],
+  "updated_files": [
+    "/app/frontend/src/pages/HomePage.js",
+    "/app/backend/tests/test_iteration15_features.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 tests passed)",
+    "frontend": "100% (all features verified)"
+  },
+  "test_credentials": {
+    "admin": "admin@consultant.com / Admin123!"
+  },
+  "seed_data_creation": "None - used existing data",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Iteration 15 verified hero slides per-page assignment and custom page rendering. Key features: (1) HeroSection component extracted to /app/frontend/src/components/HeroSection.js as shared component. (2) DynamicPage.js finds pages by URL path and fetches hero slides assigned to that page. (3) SystemPageHero component in App.js renders hero slides on system pages (news, gallery, reading-list). (4) Catch-all route renders PageProtectedRoute+DynamicPage for custom URLs like /kls. (5) Page Assignment section in Hero Slide Form shows checkboxes for all system and custom pages. Current data: 'Welcome to Legacy' slide assigned to home, news, KLS. 'Hero 3' slide assigned to home, news, gallery. Terms page has login_required=true. KLS page has URL=/kls with content 'summary de prueba' and 'content de prueba'.",
+  "verified_features": {
+    "hero_per_page_assignment": {
+      "endpoint": "GET /api/public/hero-slides?page=X",
+      "admin_form": "Page Assignment checklist with all site pages",
+      "pages_with_hero": {
+        "home": "3 slides (Welcome to Legacy, Hero 3, and one more)",
+        "news": "2 slides (Welcome to Legacy, Hero 3)",
+        "gallery": "1 slide (Hero 3)",
+        "kls": "1 slide (Welcome to Legacy)"
+      }
+    },
+    "custom_page_rendering": {
+      "component": "DynamicPage.js",
+      "url_lookup": "Finds pages by URL path from nav_pages",
+      "hero_integration": "Fetches and renders hero slides assigned to page ID"
+    },
+    "system_page_hero": {
+      "component": "SystemPageHero in App.js",
+      "pages": ["news", "gallery", "reading-list"],
+      "behavior": "Renders hero slides above page content"
+    },
+    "login_required_protection": {
+      "component": "PageProtectedRoute in App.js",
+      "routes_protected": ["/terms", "/privacy", "/page/:pageId", "catch-all *"],
+      "screen": "Shows 'Login Required' with login button"
+    },
+    "404_handling": {
+      "component": "DynamicPage.js",
+      "behavior": "Shows 404 page when URL not found in nav_pages"
+    }
+  },
+  "bug_fix_applied": {
+    "issue": "useMemo is not defined error in HomePage.js",
+    "root_cause": "Missing useMemo import from React",
+    "fix": "Added useMemo to import statement: import React, { useState, useEffect, useMemo } from 'react'",
+    "file": "/app/frontend/src/pages/HomePage.js",
+    "line": 1
+  }
+}
