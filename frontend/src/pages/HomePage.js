@@ -616,17 +616,17 @@ export default function HomePage() {
 
   useEffect(() => {
     publicAPI.getAbout().then(r => setAbout(r.data)).catch(() => {});
-    publicAPI.getServices().then(r => setServices(r.data)).catch(() => {});
-    publicAPI.getBlog().then(r => setPosts(r.data?.posts || r.data || [])).catch(() => {});
-    publicAPI.getBooks().then(r => setBooks(r.data)).catch(() => {});
-    publicAPI.getMaps().then(r => setMaps(r.data)).catch(() => {});
-    publicAPI.getMapLocations('global_business').then(r => setLocations(r.data)).catch(() => {});
-    publicAPI.getMapLocations('conferences').then(r => setLocConferences(r.data)).catch(() => {});
-    publicAPI.getMapLocations('recommended_sites').then(r => setLocRecommended(r.data)).catch(() => {});
-    publicAPI.getPortfolio().then(r => setPortfolio(r.data)).catch(() => {});
-    publicAPI.getGallery().then(r => setGallery(r.data)).catch(() => {});
-    publicAPI.getTestimonials().then(r => setTestimonials(r.data)).catch(() => {});
-    publicAPI.getHeroSlides().then(r => setHeroSlides(r.data)).catch(() => {});
+    publicAPI.getServices().then(r => setServices(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getBlog().then(r => setPosts(Array.isArray(r.data?.posts) ? r.data.posts : Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getBooks().then(r => setBooks(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getMaps().then(r => setMaps(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getMapLocations('global_business').then(r => setLocations(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getMapLocations('conferences').then(r => setLocConferences(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getMapLocations('recommended_sites').then(r => setLocRecommended(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getPortfolio().then(r => setPortfolio(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getGallery().then(r => setGallery(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getTestimonials().then(r => setTestimonials(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    publicAPI.getHeroSlides().then(r => setHeroSlides(Array.isArray(r.data) ? r.data : [])).catch(() => {});
   }, []);
 
   const sections = settings.sections || {};
