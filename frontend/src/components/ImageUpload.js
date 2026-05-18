@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { adminAPI } from '../lib/api';
+import { BACKEND_URL } from '../lib/config';
 import { Upload, Loader2, X, Image } from 'lucide-react';
 
 export default function ImageUpload({ value, onChange, className }) {
@@ -31,7 +32,7 @@ export default function ImageUpload({ value, onChange, className }) {
     <div className={className} data-testid="image-upload">
       {value ? (
         <div className="relative group">
-          <img src={value.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${value}` : value} alt="Preview" className="w-full h-40 object-cover rounded-sm border border-slate-200" />
+          <img src={value.startsWith('/api') ? `${BACKEND_URL}${value}` : value} alt="Preview" className="w-full h-40 object-cover rounded-sm border border-slate-200" />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-sm">
             <button onClick={() => fileRef.current?.click()} className="bg-white text-slate-700 px-3 py-1.5 rounded-sm text-xs font-medium">Replace</button>
             <button onClick={() => onChange('')} className="bg-red-500 text-white px-3 py-1.5 rounded-sm text-xs font-medium">Remove</button>

@@ -9,7 +9,7 @@ import { User, Loader2, ChevronLeft, ChevronRight, Calendar, Clock, Users, List,
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const todayStr = () => new Date().toISOString().split('T')[0];
 const nowTimeStr = () => { const d = new Date(); return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 const stripHtml = (s) => {

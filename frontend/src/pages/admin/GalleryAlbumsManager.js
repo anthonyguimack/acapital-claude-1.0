@@ -8,7 +8,7 @@ import { Plus, Edit2, Trash2, Loader2, Image, FolderOpen } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import RichTextEditor from '../../components/RichTextEditor';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
 
 export default function GalleryAlbumsManager() {

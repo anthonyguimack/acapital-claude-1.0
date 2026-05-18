@@ -11,7 +11,7 @@ import ImageUpload from '../../components/ImageUpload';
 import HeroCanvasEditor from '../../components/HeroCanvasEditor';
 
 const effectOptions = ['top', 'right', 'bottom', 'left'];
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API_URL } from '../../lib/config';
 const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API_URL}${v}` : v) : null;
 
 function resolveVideoUrl(url) {

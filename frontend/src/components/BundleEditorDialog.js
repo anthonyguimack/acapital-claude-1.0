@@ -7,7 +7,7 @@ import RichTextEditor from './RichTextEditor';
 import { adminAPI } from '../lib/api';
 import { toast } from 'sonner';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/config';
 
 /**
  * Shared bundle editor dialog.

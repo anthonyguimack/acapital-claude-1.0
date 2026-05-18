@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight, Send } from 'lucide-react';
 import { useSettings } from '../../App';
 import { publicAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { useT } from '../../lib/i18n';
 
 const socialIconMap = { facebook: Facebook, twitter: Twitter, instagram: Instagram, linkedin: Linkedin, youtube: Youtube };
@@ -28,7 +29,7 @@ function FooterContent({ settings, socialLinks, footerPages, isExternal, logoSrc
   const tt = useT();
   const isClassic = theme === 'classic';
   const fontFamily = isClassic ? "'Playfair Display', serif" : undefined;
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const brandName = tt(settings.brand_name) || 'Legacy';
 
   // Split footer pages into two columns
@@ -133,7 +134,7 @@ function FooterContent({ settings, socialLinks, footerPages, isExternal, logoSrc
 function DefaultFooter() {
   const { settings, socialLinks, footerPages, isExternal, isAdmin } = useFooterData();
   if (isAdmin) return null;
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const logoOff = settings.logo_off;
   const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${API}${logoOff}` : logoOff) : null;
 
@@ -147,7 +148,7 @@ function DefaultFooter() {
 function ModernFooter() {
   const { settings, socialLinks, footerPages, isExternal, isAdmin } = useFooterData();
   if (isAdmin) return null;
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const logoOff = settings.logo_off;
   const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${API}${logoOff}` : logoOff) : null;
 
@@ -164,7 +165,7 @@ function ModernFooter() {
 function ClassicFooter() {
   const { settings, socialLinks, footerPages, isExternal, isAdmin } = useFooterData();
   if (isAdmin) return null;
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const logoOff = settings.logo_off;
   const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${API}${logoOff}` : logoOff) : null;
 

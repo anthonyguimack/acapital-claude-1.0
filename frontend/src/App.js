@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { BACKEND_URL } from './lib/config';
 import { AuthProvider, useAuth } from './lib/auth';
 import { MemberProvider, useMember } from './lib/memberAuth';
 import { authAPI, publicAPI } from './lib/api';
@@ -134,7 +135,7 @@ function SettingsProvider({ children }) {
   useEffect(() => {
     const faviconUrl = settings.favicon;
     if (!faviconUrl) return;
-    const src = faviconUrl.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${faviconUrl}` : faviconUrl;
+    const src = faviconUrl.startsWith('/api') ? `${BACKEND_URL}${faviconUrl}` : faviconUrl;
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement('link');

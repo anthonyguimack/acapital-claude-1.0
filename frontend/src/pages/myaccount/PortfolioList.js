@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useOutletContext } from 'react-router-dom';
 import { memberAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { Plus, Eye, Edit2, Briefcase } from 'lucide-react';
 
 const fmtCurrency = (v) => `$${(parseFloat(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -61,7 +62,7 @@ export default function PortfolioList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map(p => (
             <div key={p.id} className="bg-[#13161e] border border-white/5 rounded-lg overflow-hidden group hover:border-[#c9a84c]/30 transition-colors" data-testid={`portfolio-card-${p.id}`}>
-              {p.cover_image && <div className="h-32 overflow-hidden"><img src={p.cover_image?.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${p.cover_image}` : p.cover_image} alt="" className="w-full h-full object-cover" /></div>}
+              {p.cover_image && <div className="h-32 overflow-hidden"><img src={p.cover_image?.startsWith('/api') ? `${BACKEND_URL}${p.cover_image}` : p.cover_image} alt="" className="w-full h-full object-cover" /></div>}
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${p.status === 'active' ? 'bg-green-500/10 text-green-400' : 'bg-gray-500/10 text-gray-400'}`}>

@@ -11,7 +11,7 @@ import RichTextEditor from '../../components/RichTextEditor';
 import SlotRecurrencePicker from '../../components/SlotRecurrencePicker';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const SESSION_TYPES = ['One-on-One', 'Group'];
 const SLOT_STATUSES = ['active', 'inactive', 'cancelled'];
 const TIME_OPTIONS = [];

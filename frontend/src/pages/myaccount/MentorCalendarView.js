@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { memberAPI, publicAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { normalizeRichText } from '../../lib/richText';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -8,7 +9,7 @@ import { Loader2, Calendar, Clock, User, Video, MapPin, Users, List, Grid3X3, Do
 import CalendarGrid from '../../components/CalendarGrid';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+const API = BACKEND_URL;
 const todayStr = () => new Date().toISOString().split('T')[0];
 const stripHtml = (s) => {
   if (!s) return '';
@@ -155,7 +156,6 @@ export default function MentorCalendarView() {
         memberAPI.getMyCredits().then(r2 => setCredits(r2.data || [])).catch(() => {});
         load();
       } else if (isPaid) {
-        const API = process.env.REACT_APP_BACKEND_URL;
         const token = localStorage.getItem('auth_token');
         const r = await axios.post(`${API}/api/member/mentorship/checkout/${slotId}`,
           { origin_url: window.location.origin },

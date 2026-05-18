@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const MAX_POLLS = 10;
 
 export default function BundleCheckoutSuccess() {

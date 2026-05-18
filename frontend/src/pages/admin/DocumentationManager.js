@@ -1,7 +1,7 @@
 import React from 'react';
 import { FileText, Map, BookOpen, Wrench, ExternalLink, ClipboardCheck, Server } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 
 const docs = [
   {

@@ -13,7 +13,7 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from 
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
 
 const emptyItem = { name: '', title: '', content: '', image: '', order: 0, visible: true };

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useMember } from '../../lib/memberAuth';
 import { memberAPI, publicAPI, geoAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { toast } from 'sonner';
 import { User, Save, Loader2, Edit3, Lock, Eye, ListChecks, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../components/ui/dialog';
@@ -270,7 +271,7 @@ export default function MembershipProfile() {
         <div className="bg-[#13161e] border border-white/5 rounded-lg p-6 flex flex-col items-center">
           <div className="w-28 h-28 rounded-full flex items-center justify-center overflow-hidden" style={{ backgroundColor: 'var(--ma-avatar-bg, rgba(201,168,76,0.1))', border: '2px solid var(--ma-avatar-border, rgba(201,168,76,0.3))' }}>
             {(form.avatar || defaultAvatar) ?
-              <img src={(form.avatar || defaultAvatar).startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${form.avatar || defaultAvatar}` : (form.avatar || defaultAvatar)} alt="" className="w-full h-full object-cover" /> :
+              <img src={(form.avatar || defaultAvatar).startsWith('/api') ? `${BACKEND_URL}${form.avatar || defaultAvatar}` : (form.avatar || defaultAvatar)} alt="" className="w-full h-full object-cover" /> :
               <User className="w-10 h-10" style={{ color: 'var(--ma-accent, #c9a84c)', opacity: 0.5 }} />}
           </div>
           <p className="mt-3 text-white font-medium text-sm">{member?.first_name} {member?.last_name}</p>

@@ -18,6 +18,14 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import HeroSection from '../components/HeroSection';
+import {
+  AurexAudience, AurexProcess, AurexPricing, AurexTeam, AurexEvents, AurexPartners, AurexClients, AurexVideo, useAurexSections,
+  AurexAboutMono, AurexServicesMono, AurexNewsMono, AurexBlogMono, AurexReadingMono,
+  AurexMapMono, AurexPortfolioMono, AurexGalleryMono, AurexTestimonialsMono, AurexContactMono,
+} from '../components/AurexSections';
+import { AUREX_FONTS, isAurexFamily, PERSONALBRAND_DEFAULTS } from '../lib/themeColors';
+import { BACKEND_URL as API } from '../lib/config';
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -27,7 +35,6 @@ L.Icon.Default.mergeOptions({
 });
 
 const iconMap = { 'briefcase': Briefcase, 'trending-up': TrendingUp, 'bar-chart-3': BarChart3, 'monitor': Monitor };
-const API = process.env.REACT_APP_BACKEND_URL;
 const cleanHtml = (html) => {
   if (html == null) return '';
   const str = typeof html === 'string' ? html : String(html);
@@ -36,14 +43,6 @@ const cleanHtml = (html) => {
     .replace(/&nbsp\b/gi, ' ')
     .replace(/\u00A0/g, ' ');
 };
-
-import HeroSection from '../components/HeroSection';
-import {
-  AurexAudience, AurexProcess, AurexPricing, AurexTeam, AurexEvents, AurexPartners, AurexClients, AurexVideo, useAurexSections,
-  AurexAboutMono, AurexServicesMono, AurexNewsMono, AurexBlogMono, AurexReadingMono,
-  AurexMapMono, AurexPortfolioMono, AurexGalleryMono, AurexTestimonialsMono, AurexContactMono,
-} from '../components/AurexSections';
-import { AUREX_FONTS, isAurexFamily, PERSONALBRAND_DEFAULTS } from '../lib/themeColors';
 
 /* ==================== ABOUT ==================== */
 function AboutSection({ data, theme }) {
@@ -292,7 +291,7 @@ function ReadingListSection({ books, theme }) {
         <div className={`grid gap-6 ${theme === 'modern' ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-5' : theme === 'classic' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'}`}>
           {books.slice(0, theme === 'modern' ? 5 : theme === 'classic' ? 4 : 5).map(b => {
             const coverImg = b.image || b.cover_image;
-            const imgSrc = coverImg ? (coverImg.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${coverImg}` : coverImg) : null;
+            const imgSrc = coverImg ? (coverImg.startsWith('/api') ? `${API}${coverImg}` : coverImg) : null;
             return (
             <Link to="/reading-list" key={b.id} className={`group transition-all ${theme === 'modern' ? 'rounded-xl overflow-hidden shadow-sm hover:shadow-lg bg-white' : theme === 'classic' ? 'border-2 overflow-hidden hover:shadow-md bg-white' : 'rounded-lg overflow-hidden shadow-sm hover:shadow-md bg-white'}`} style={theme === 'classic' ? { borderColor: 'var(--color-primary, #1a2332)' } : {}}>
               {imgSrc ? (

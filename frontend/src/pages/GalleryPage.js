@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { publicAPI } from '../lib/api';
 import { ChevronLeft, ChevronRight, X, ExternalLink } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/config';
 const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
 
 function Lightbox({ items, currentIndex, onClose, onNext, onPrev }) {

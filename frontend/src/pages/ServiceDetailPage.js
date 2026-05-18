@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { publicAPI } from '../lib/api';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/config';
 
 export default function ServiceDetailPage() {
   const { serviceId } = useParams();

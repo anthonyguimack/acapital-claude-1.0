@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { useSettings } from '../../App';
+import { BACKEND_URL } from '../../lib/config';
 import {
   LayoutDashboard, Image, Info, Package, FileText, BookOpen, Map, Images, Briefcase, 
   MessageSquare, Mail, CreditCard, Settings, LogOut, ChevronLeft, Menu, X, FileStack, Users,
@@ -74,7 +75,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const logoOff = settings.logo_off;
   const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${API}${logoOff}` : logoOff) : null;
 

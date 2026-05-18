@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Loader2, Package, ShoppingCart, Users, Gift, CreditCard, ArrowRight } from 'lucide-react';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const fmtMoney = (c, cur = 'usd') => { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: (cur || 'usd').toUpperCase() }).format((c || 0) / 100); } catch { return `$${((c || 0) / 100).toFixed(2)}`; } };
 
 function BundleCard({ bundle, onBuy, buying }) {

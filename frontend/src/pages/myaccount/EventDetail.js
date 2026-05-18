@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Clock, MapPin, Users, Video, Map, ExternalLink, Download, Paperclip, Loader2 } from 'lucide-react';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const today = () => new Date().toISOString().split('T')[0];
 
 export default function EventDetail() {

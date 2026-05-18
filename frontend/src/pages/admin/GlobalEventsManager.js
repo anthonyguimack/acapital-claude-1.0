@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { toast } from 'sonner';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -81,7 +82,7 @@ export default function GlobalEventsManager() {
     setRegsLoading(false);
   };
 
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
 
   const dt = useDataTable(events, {
     searchAccessor: e => `${e.title || ''} ${e.type || ''} ${e.location || ''} ${e.status || ''}`,

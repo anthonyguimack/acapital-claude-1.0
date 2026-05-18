@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMember } from '../../lib/memberAuth';
 import { publicAPI, memberAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import {
   User, Key, Users, Briefcase, LogOut, Menu, X, ChevronRight, Home, Award, UserCheck, Loader2, Wallet, ExternalLink, Bell, CalendarDays, BookOpen, Rss, BarChart3, Package
 } from 'lucide-react';
@@ -177,7 +178,7 @@ export default function MyAccountLayout() {
           <Link to="/" className="flex items-center gap-2" data-testid="myaccount-brand">
             {(() => {
               const logoOff = settings.logo_off;
-              const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${logoOff}` : logoOff) : null;
+              const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${BACKEND_URL}${logoOff}` : logoOff) : null;
               if (logoSrc) return <img src={logoSrc} alt={brandName} className="h-8 w-auto object-contain" data-testid="sidebar-logo-img" />;
               return (
                 <>

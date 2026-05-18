@@ -26,7 +26,7 @@ import { contactAPI, blogExternalAPI, checkoutAPI } from '../lib/api';
 import CaptchaWidget from './CaptchaWidget';
 import { useSettings } from '../App';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/config';
 const resolveImg = (src) => (src && src.startsWith('/api') ? `${API}${src}` : src);
 
 // ─── Scroll-reveal wrapper (IntersectionObserver) ────────────────────────

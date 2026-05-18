@@ -14,7 +14,7 @@ import ImageUpload from '../../components/ImageUpload';
 
 const emptyItem = { title: '', summary: '', image: '', category: '', link: '', open_in_new_tab: false, order: 0 };
 const emptyCategory = { name: '', slug: '', order: 0 };
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 
 function SortableGalleryCard({ item, onEdit, onDelete, onToggleSelect, isSelected }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });

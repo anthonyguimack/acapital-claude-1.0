@@ -14,7 +14,7 @@ import { AUREX_ITEM_ICONS } from '../../lib/aurexIconList';
 import * as lucide from 'lucide-react';
 import { Loader2, Save, Plus, Edit2, Trash2, Upload, Eye, EyeOff, Sparkles, X, Copy, Search } from 'lucide-react';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 
 function IconPicker({ value, onChange, fieldKey }) {
   const [open, setOpen] = useState(false);

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { toast } from 'sonner';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -52,7 +53,7 @@ export default function PortfolioManager() {
           </tr></thead>
           <tbody>{dt.visibleItems.map(item => (
             <tr key={item.id} className="border-b border-slate-50">
-              <td className="p-3"><img src={item.image?.startsWith('/api') ? `${process.env.REACT_APP_BACKEND_URL}${item.image}` : item.image} alt="" className="w-16 h-10 object-cover rounded-sm" /></td>
+              <td className="p-3"><img src={item.image?.startsWith('/api') ? `${BACKEND_URL}${item.image}` : item.image} alt="" className="w-16 h-10 object-cover rounded-sm" /></td>
               <td className="p-3 font-medium">{item.title}</td>
               <td className="p-3 text-slate-500">{item.tags?.join(', ')}</td>
               <td className="p-3 text-right">

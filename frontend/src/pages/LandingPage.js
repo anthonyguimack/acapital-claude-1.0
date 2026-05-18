@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
 import { normalizeRichText } from '../lib/richText';
 import { useT } from '../lib/i18n';
 
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../lib/config';
 const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
 const cv = (name, fallback) => `var(--lp-${name}, ${fallback})`;
 

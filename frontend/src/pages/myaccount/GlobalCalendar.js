@@ -7,7 +7,7 @@ import CalendarGrid from '../../components/CalendarGrid';
 import CalendarSyncCard from '../../components/CalendarSyncCard';
 
 const v = (name, fb) => `var(--ma-${name}, ${fb})`;
-const API = process.env.REACT_APP_BACKEND_URL;
+import { BACKEND_URL as API } from '../../lib/config';
 const today = () => new Date().toISOString().split('T')[0];
 
 function MonthView({ events, year, month, monthLabel, onPrevMonth, onNextMonth, onDayClick }) {

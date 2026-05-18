@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../lib/auth';
 import { publicAPI } from '../../lib/api';
+import { BACKEND_URL } from '../../lib/config';
 import { useSettings, useTheme } from '../../App';
 import LanguageSwitcher from '../LanguageSwitcher';
 import { useT } from '../../lib/i18n';
@@ -90,7 +91,7 @@ function DefaultNavbar() {
   const tt = useT();
   const { user, logout, settings, socialLinks, headerPages, handlePageClick, isExternal, isAdmin, location, loginOpen, setLoginOpen, searchOpen, setSearchOpen, hasCmsAccess, hasMyAccount } = useNavData();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
   // Default theme always has solid bg, so use logo_on_2 (or fallback to logo_on_1)
   const logoSrc = resolveSrc(settings.logo_on_2 || settings.logo_on_1 || settings.logo_on);
@@ -164,7 +165,7 @@ function ModernNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hasHero, setHasHero] = useState(true);
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
   const logoOn1 = resolveSrc(settings.logo_on_1 || settings.logo_on);
   const logoOn2 = resolveSrc(settings.logo_on_2 || settings.logo_on);
@@ -260,7 +261,7 @@ function ClassicNavbar() {
   const tt = useT();
   const { user, logout, settings, socialLinks, headerPages, handlePageClick, isExternal, isAdmin, location, loginOpen, setLoginOpen, hasCmsAccess, hasMyAccount } = useNavData();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const API = process.env.REACT_APP_BACKEND_URL;
+  const API = BACKEND_URL;
   const resolveSrc = (v) => v ? (v.startsWith('/api') ? `${API}${v}` : v) : null;
   const logoSrc = resolveSrc(settings.logo_on_2 || settings.logo_on_1 || settings.logo_on);
   const brandName = tt(settings.brand_name) || 'Legacy';
