@@ -1,6 +1,6 @@
 // Aurex section schemas — drive the polymorphic admin UI.
 // Each entry defines: config fields (page-level) + item fields (CRUD rows).
-import { Users, Workflow, DollarSign, UserCircle, Calendar, Building2, Award, Film, Briefcase, MessageCircle, Newspaper, BookOpen, MapPin } from 'lucide-react';
+import { Users, Workflow, DollarSign, UserCircle, Calendar, Building2, Award, Film, Briefcase, MessageCircle, Newspaper, BookOpen, MapPin, Image, GalleryHorizontal } from 'lucide-react';
 import { adminText } from './i18n';
 
 // Field types: 'text' | 'textarea' | 'url' | 'number' | 'bool' | 'image' | 'icon' | 'rich' | 'social_links'
@@ -13,6 +13,7 @@ export const AUREX_SECTIONS = {
     icon: Users,
     description: 'Target-audience cards. Each card = icon + title + description.',
     configFields: [
+      { key: 'eyebrow',     label: 'Eyebrow (above title)', type: 'text',     placeholder: 'Why choose us' },
       { key: 'title',        label: 'Section title',        type: 'text',     placeholder: 'Aurex is for you' },
       { key: 'subtitle',     label: 'Subtitle',             type: 'textarea', placeholder: 'Who this is for…' },
       { key: 'cta_text',     label: 'CTA button text',      type: 'text',     placeholder: 'Get started' },
@@ -20,6 +21,7 @@ export const AUREX_SECTIONS = {
       { key: 'cta_new_tab',  label: 'Open CTA in new window', type: 'bool' },
     ],
     itemFields: [
+      { key: 'eyebrow',     label: 'Eyebrow (above title)', type: 'text',     placeholder: '' },
       { key: 'icon',        label: 'Icon', type: 'icon',     placeholder: 'briefcase' },
       { key: 'title',       label: 'Title',              type: 'text',     required: true },
       { key: 'description', label: 'Description',        type: 'rich' },
@@ -32,6 +34,7 @@ export const AUREX_SECTIONS = {
     icon: Workflow,
     description: 'Vertical timeline of process steps (auto-alternating left/right).',
     configFields: [
+      { key: 'eyebrow',  label: 'Eyebrow (above title)', type: 'text',     placeholder: 'How we work' },
       { key: 'title',    label: 'Section title', type: 'text',     placeholder: 'Our Process' },
       { key: 'subtitle', label: 'Subtitle',      type: 'textarea' },
     ],
@@ -48,6 +51,7 @@ export const AUREX_SECTIONS = {
     icon: DollarSign,
     description: 'Plan columns with features list. One plan can be marked "featured".',
     configFields: [
+      { key: 'eyebrow',      label: 'Eyebrow (above title)',   type: 'text',     placeholder: 'Pricing plans' },
       { key: 'title',        label: 'Section title',           type: 'text',     placeholder: 'Pricing' },
       { key: 'subtitle',     label: 'Subtitle',                type: 'textarea' },
       { key: 'show_toggle',  label: 'Monthly/annual switch',   type: 'bool' },
@@ -73,6 +77,7 @@ export const AUREX_SECTIONS = {
     icon: UserCircle,
     description: 'Team member grid with photos, roles, and social links.',
     configFields: [
+      { key: 'eyebrow',            label: 'Eyebrow (above title)', type: 'text',     placeholder: 'Meet the experts' },
       { key: 'title',              label: 'Section title',         type: 'text',     placeholder: 'Our Team' },
       { key: 'subtitle',           label: 'Subtitle',              type: 'textarea' },
       { key: 'show_view_all',      label: 'Show "View all" button', type: 'bool' },
@@ -99,6 +104,7 @@ export const AUREX_SECTIONS = {
     icon: Film,
     description: 'A single video embed (YouTube / Vimeo / direct MP4 URL) with an optional section title.',
     configFields: [
+      { key: 'eyebrow',  label: 'Eyebrow (above title)',    type: 'text',     placeholder: '' },
       { key: 'title',    label: 'Section title (optional)', type: 'text',     placeholder: '' },
       { key: 'subtitle', label: 'Subtitle',                 type: 'textarea' },
       { key: 'video_url', label: 'Video URL (YouTube, Vimeo, or .mp4)', type: 'url', placeholder: 'https://www.youtube.com/watch?v=…' },
@@ -192,6 +198,7 @@ export const AUREX_SECTIONS = {
     icon: Calendar,
     description: 'Config-only. Events come from Calendar → Global Events. Change content there.',
     configFields: [
+      { key: 'eyebrow',           label: 'Eyebrow (above title)', type: 'text',    placeholder: 'Upcoming events' },
       { key: 'title',             label: 'Section title',        type: 'text',     placeholder: 'Upcoming Events' },
       { key: 'subtitle',          label: 'Subtitle',             type: 'textarea' },
       { key: 'max_items',         label: 'Max events to show',   type: 'number',   placeholder: '5' },
@@ -252,5 +259,52 @@ export const AUREX_SECTIONS = {
       ] },
     ],
     itemPreview: (i) => adminText(i.name),
+  },
+
+  // Config-only sections for Reading List, Portfolio, and Gallery.
+  // Items come from their dedicated managers (Books, Portfolio, Gallery).
+  aurex_reading_cfg: {
+    label: 'Reading List — Section Configuration',
+    icon: BookOpen,
+    description: 'Override the Reading List section header + CTA (books come from the Books manager).',
+    configFields: [
+      { key: 'eyebrow',  label: 'Eyebrow (above title)', type: 'text',     placeholder: 'Reading List' },
+      { key: 'title',    label: 'Section title',         type: 'text',     placeholder: 'Reading List' },
+      { key: 'subtitle', label: 'Subtitle',              type: 'textarea' },
+      { key: 'cta_text', label: 'View-all button text',  type: 'text',     placeholder: 'View all books' },
+      { key: 'cta_url',  label: 'View-all URL',          type: 'text',     placeholder: '/reading-list' },
+      { key: 'cta_new_tab', label: 'Open in new window', type: 'bool' },
+    ],
+    itemFields: null,
+  },
+
+  aurex_portfolio_cfg: {
+    label: 'Portfolio (Featured Work) — Section Configuration',
+    icon: Image,
+    description: 'Override the Featured Work section header + CTA (items come from the Portfolio manager).',
+    configFields: [
+      { key: 'eyebrow',  label: 'Eyebrow (above title)', type: 'text',     placeholder: 'Featured Work' },
+      { key: 'title',    label: 'Section title',         type: 'text',     placeholder: 'Featured Projects' },
+      { key: 'subtitle', label: 'Subtitle',              type: 'textarea' },
+      { key: 'cta_text', label: 'View-all button text',  type: 'text',     placeholder: 'View all projects' },
+      { key: 'cta_url',  label: 'View-all URL',          type: 'text',     placeholder: '/featured-projects' },
+      { key: 'cta_new_tab', label: 'Open in new window', type: 'bool' },
+    ],
+    itemFields: null,
+  },
+
+  aurex_gallery_cfg: {
+    label: 'Gallery — Section Configuration',
+    icon: GalleryHorizontal,
+    description: 'Override the Gallery section header + CTA (images come from the Gallery manager).',
+    configFields: [
+      { key: 'eyebrow',  label: 'Eyebrow (above title)', type: 'text',     placeholder: 'Moments' },
+      { key: 'title',    label: 'Section title',         type: 'text',     placeholder: 'Gallery' },
+      { key: 'subtitle', label: 'Subtitle',              type: 'textarea' },
+      { key: 'cta_text', label: 'View-all button text',  type: 'text',     placeholder: 'View all' },
+      { key: 'cta_url',  label: 'View-all URL',          type: 'text',     placeholder: '/gallery' },
+      { key: 'cta_new_tab', label: 'Open in new window', type: 'bool' },
+    ],
+    itemFields: null,
   },
 };

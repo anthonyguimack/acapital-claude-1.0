@@ -304,12 +304,16 @@ export const AUREX_PALETTE = [
 
 // Font picker — Google Fonts loaded in public/index.html when Aurex theme active.
 export const AUREX_FONTS = [
+  { key: 'plus_jakarta',   label: 'Plus Jakarta Sans', css: "'Plus Jakarta Sans', 'Inter', sans-serif", note: 'Personal Brand Pro default' },
   { key: 'sora',           label: 'Sora',           css: "'Sora', sans-serif",           note: 'Modern, geometric' },
   { key: 'inter',          label: 'Inter',          css: "'Inter', sans-serif",          note: 'Neutral, legible' },
   { key: 'playfair',       label: 'Playfair Display', css: "'Playfair Display', serif",  note: 'Elegant serif' },
   { key: 'space_grotesk',  label: 'Space Grotesk',  css: "'Space Grotesk', sans-serif",  note: 'Technical' },
   { key: 'dm_sans',        label: 'DM Sans',        css: "'DM Sans', sans-serif",        note: 'Friendly' },
 ];
+
+// Default font CSS string for Personal Brand Pro template
+export const PB_FONT_CSS = "'Plus Jakarta Sans', 'Inter', sans-serif";
 
 // Returns 'dark' or 'light' based on bg luminance — used for auto-contrast.
 export function aurexContrastFor(hex) {

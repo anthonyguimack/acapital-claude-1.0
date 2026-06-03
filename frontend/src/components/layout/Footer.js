@@ -28,7 +28,10 @@ function useFooterData() {
 function FooterContent({ settings, socialLinks, footerPages, isExternal, logoSrc, theme }) {
   const tt = useT();
   const isClassic = theme === 'classic';
-  const fontFamily = isClassic ? "'Playfair Display', serif" : undefined;
+  const isPersonalBrand = theme === 'personalbrand';
+  const fontFamily = isClassic ? "'Playfair Display', serif"
+    : isPersonalBrand ? "'Plus Jakarta Sans', 'Inter', sans-serif"
+    : undefined;
   const API = BACKEND_URL;
   const brandName = tt(settings.brand_name) || 'Legacy';
 
@@ -178,10 +181,32 @@ function ClassicFooter() {
   );
 }
 
+function PersonalBrandFooter() {
+  const { settings, socialLinks, footerPages, isExternal, isAdmin } = useFooterData();
+  if (isAdmin) return null;
+  const API = BACKEND_URL;
+  const logoOff = settings.logo_off;
+  const logoSrc = logoOff ? (logoOff.startsWith('/api') ? `${API}${logoOff}` : logoOff) : null;
+
+  return (
+    <footer
+      data-testid="site-footer"
+      style={{
+        backgroundColor: 'var(--color-footer-bg, #111111)',
+        color: 'var(--color-footer-text, #ffffff)',
+        fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+      }}
+    >
+      <FooterContent settings={settings} socialLinks={socialLinks} footerPages={footerPages} isExternal={isExternal} logoSrc={logoSrc} theme="personalbrand" />
+    </footer>
+  );
+}
+
 export default function Footer() {
   const settings = useSettings();
   const theme = settings.active_theme || 'default';
   if (theme === 'modern') return <ModernFooter />;
   if (theme === 'classic') return <ClassicFooter />;
+  if (theme === 'personalbrand') return <PersonalBrandFooter />;
   return <DefaultFooter />;
 }

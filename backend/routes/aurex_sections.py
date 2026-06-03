@@ -35,6 +35,8 @@ VALID_SECTIONS = {
     # subtitle/CTA for legacy sections rendered by the Aurex mono variants.
     "aurex_services_cfg", "aurex_testimonials_cfg", "aurex_news_cfg",
     "aurex_blog_cfg", "aurex_locations_cfg",
+    # Config-only entries for Reading List, Portfolio, and Gallery.
+    "aurex_reading_cfg", "aurex_portfolio_cfg", "aurex_gallery_cfg",
 }
 ITEM_SECTIONS = VALID_SECTIONS - {
     "aurex_events", "aurex_video",

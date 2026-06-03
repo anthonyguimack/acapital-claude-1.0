@@ -14,6 +14,7 @@ const sectionLabels = {
   news: 'Company News', blog: 'External Blog', reading_list: 'Reading List',
   map: 'Travel Map', portfolio: 'Portfolio', gallery: 'Gallery',
   testimonials: 'Testimonials', contact: 'Contact Form',
+  locations: 'Locations Map', map_global: 'Global Map', map_conferences: 'Conferences Map', map_recommended: 'Recommended Sites Map',
   // Aurex-specific
   aurex_audience: 'Aurex is for you (Target Audience)',
   aurex_process: 'Our Process',
@@ -23,6 +24,15 @@ const sectionLabels = {
   aurex_partners: 'Partners',
   aurex_clients: 'Our Clients',
   aurex_video: 'Video',
+  // Config-only (header/CTA overrides)
+  aurex_services_cfg: 'Services — Section Config',
+  aurex_testimonials_cfg: 'Testimonials — Section Config',
+  aurex_news_cfg: 'Latest News — Section Config',
+  aurex_blog_cfg: 'Blog — Section Config',
+  aurex_locations_cfg: 'Locations — Section Config',
+  aurex_reading_cfg: 'Reading List — Section Config',
+  aurex_portfolio_cfg: 'Portfolio — Section Config',
+  aurex_gallery_cfg: 'Gallery — Section Config',
 };
 
 function SortableItem({ id, label, enabled, loginRequired, config, onToggle, onToggleLogin, onConfigChange, showAurexControls }) {
