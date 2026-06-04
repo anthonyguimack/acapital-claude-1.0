@@ -663,7 +663,10 @@ export default function HomePage() {
       });
     };
   }, [isPersonalBrand]);
-  const aurexData = useAurexSections();
+  // When PB theme is active, read the operator-configured active personality
+  // (set via CMS → Sections → "Active mini-site"). Falls back to null = Global.
+  const pbActivePersonality = isPersonalBrand ? (settings.pb_active_personality || null) : null;
+  const aurexData = useAurexSections(pbActivePersonality);
   // Each Aurex-family theme keeps its own section_configs scope so the
   // operator can have separate per-section bg/font choices for each layout.
   const aurexConfigs = (settings.section_configs && settings.section_configs[activeTheme]) || (settings.section_configs && settings.section_configs.aurex) || {};

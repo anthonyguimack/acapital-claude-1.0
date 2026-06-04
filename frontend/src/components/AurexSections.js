@@ -463,7 +463,10 @@ export function AurexVideo({ config = {}, bg, font, contrast }) {
 
 const SECTIONS_ITEMIZED = ['aurex_audience', 'aurex_process', 'aurex_pricing', 'aurex_team', 'aurex_partners', 'aurex_clients'];
 
-export function useAurexSections() {
+// personality = null | 'business' | 'lifestyle' | 'personal'
+// When set, each section's config + items are fetched for that PB mini-site
+// (with automatic fallback to Global on the backend if not yet configured).
+export function useAurexSections(personality) {
   const [data, setData] = useState({});
   useEffect(() => {
     const keys = [
@@ -471,13 +474,14 @@ export function useAurexSections() {
       'aurex_services_cfg', 'aurex_testimonials_cfg', 'aurex_news_cfg', 'aurex_blog_cfg', 'aurex_locations_cfg',
       'aurex_reading_cfg', 'aurex_portfolio_cfg', 'aurex_gallery_cfg',
     ];
-    Promise.all(keys.map(k => fetch(`${API}/api/public/aurex/${k}`).then(r => r.ok ? r.json() : { config: {}, items: [] }).catch(() => ({ config: {}, items: [] }))))
+    const qs = personality ? `?personality=${personality}` : '';
+    Promise.all(keys.map(k => fetch(`${API}/api/public/aurex/${k}${qs}`).then(r => r.ok ? r.json() : { config: {}, items: [] }).catch(() => ({ config: {}, items: [] }))))
       .then(results => {
         const map = {};
         keys.forEach((k, i) => { map[k] = results[i]; });
         setData(map);
       });
-  }, []);
+  }, [personality]);
   return data;
 }
 
@@ -628,7 +632,7 @@ export function AurexServicesMono({ services, bg, font, cmsConfig = {} }) {
 }
 
 // News
-export function AurexNewsMono({ posts, bg, font, cmsConfig = {} }) {
+export function AurexNewsMono({ posts, bg, font, cmsConfig = {}, sectionNumber }) {
   const tt = useT();
   const { lang } = useLang();
   const filtered = (posts || []).filter(p => itemHasLocale(p.title, lang));
@@ -639,7 +643,12 @@ export function AurexNewsMono({ posts, bg, font, cmsConfig = {} }) {
       <div className="max-w-7xl mx-auto">
         <Reveal className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
-            {tt(cmsConfig.eyebrow) && <p className={`text-[11px] uppercase tracking-[0.3em] font-semibold ${m.eyebrowClass} mb-3`}>{tt(cmsConfig.eyebrow)}</p>}
+            {(sectionNumber || tt(cmsConfig.eyebrow)) && (
+              <p className={`text-[11px] uppercase tracking-[0.3em] font-semibold mb-3`} style={{ color: 'var(--color-primary)' }}>
+                {sectionNumber && <span className="mr-1">{sectionNumber}/</span>}
+                {tt(cmsConfig.eyebrow)}
+              </p>
+            )}
             {tt(cmsConfig.title) && <h2 className="text-3xl md:text-5xl font-bold tracking-tight" data-testid="news-title">{tt(cmsConfig.title)}</h2>}
             {tt(cmsConfig.subtitle) && <p className={`mt-2 max-w-2xl ${m.mutedClass}`}>{tt(cmsConfig.subtitle)}</p>}
           </div>
@@ -670,7 +679,7 @@ export function AurexNewsMono({ posts, bg, font, cmsConfig = {} }) {
 }
 
 // External Blog
-export function AurexBlogMono({ bg, font, cmsConfig = {} }) {
+export function AurexBlogMono({ bg, font, cmsConfig = {}, sectionNumber }) {
   const tt = useT();
   const { lang } = useLang();
   const settings = useSettings();
@@ -688,7 +697,12 @@ export function AurexBlogMono({ bg, font, cmsConfig = {} }) {
       <div className="max-w-7xl mx-auto">
         <Reveal className="flex items-end justify-between mb-12 flex-wrap gap-4">
           <div>
-            {tt(cmsConfig.eyebrow) && <p className={`text-[11px] uppercase tracking-[0.3em] font-semibold ${m.eyebrowClass} mb-3`}>{tt(cmsConfig.eyebrow)}</p>}
+            {(sectionNumber || tt(cmsConfig.eyebrow)) && (
+              <p className={`text-[11px] uppercase tracking-[0.3em] font-semibold mb-3`} style={{ color: 'var(--color-primary)' }}>
+                {sectionNumber && <span className="mr-1">{sectionNumber}/</span>}
+                {tt(cmsConfig.eyebrow)}
+              </p>
+            )}
             {tt(cmsConfig.title) && <h2 className="text-3xl md:text-5xl font-bold tracking-tight" data-testid="blog-title">{tt(cmsConfig.title)}</h2>}
             {tt(cmsConfig.subtitle) && <p className={`mt-2 max-w-2xl ${m.mutedClass}`}>{tt(cmsConfig.subtitle)}</p>}
           </div>

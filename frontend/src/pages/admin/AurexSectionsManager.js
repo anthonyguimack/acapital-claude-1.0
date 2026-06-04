@@ -14,7 +14,7 @@ import { AUREX_ITEM_ICONS } from '../../lib/aurexIconList';
 import * as lucide from 'lucide-react';
 import { Loader2, Save, Plus, Edit2, Trash2, Upload, Eye, EyeOff, Sparkles, X, Copy, Search } from 'lucide-react';
 
-import { BACKEND_URL as API } from '../../lib/config';
+const API = process.env.REACT_APP_BACKEND_URL;
 
 function IconPicker({ value, onChange, fieldKey }) {
   const [open, setOpen] = useState(false);
@@ -155,8 +155,35 @@ function FieldInput({ field, value, onChange }) {
   );
 }
 
+// Personality tabs for sections that support per-mini-site data (currently aurex_team).
+// null = Global / Aurex One-page (unchanged behaviour); 'business'|'lifestyle'|'personal' = PB mini-site.
+const PB_SECTION_TABS = [
+  { key: null,         label: 'Global',         hint: 'Aurex One-page + all non-PB themes',   cls: 'border-sky-400    text-sky-700'     },
+  { key: 'business',   label: 'PB — Business',   hint: 'Personal Brand Business mini-site',   cls: 'border-slate-400  text-slate-700'   },
+  { key: 'lifestyle',  label: 'PB — Lifestyle',  hint: 'Personal Brand Lifestyle mini-site',  cls: 'border-emerald-400 text-emerald-700' },
+  { key: 'personal',   label: 'PB — Personal',   hint: 'Personal Brand Personal mini-site',   cls: 'border-violet-400  text-violet-700'  },
+];
+// Every Aurex section supports per-personality data — the backend already stores
+// config and items keyed by pb_personality. Listing all keys here enables the
+// Global | PB–Business | PB–Lifestyle | PB–Personal tab strip in the admin.
+const PB_SCOPED_SECTIONS = new Set([
+  'aurex_audience', 'aurex_process', 'aurex_pricing', 'aurex_team',
+  'aurex_partners', 'aurex_clients', 'aurex_events', 'aurex_video',
+  'aurex_services_cfg', 'aurex_testimonials_cfg', 'aurex_news_cfg',
+  'aurex_blog_cfg', 'aurex_locations_cfg',
+  'aurex_reading_cfg', 'aurex_portfolio_cfg', 'aurex_gallery_cfg',
+]);
+
 function SectionEditor({ sectionKey }) {
+  const settings = useSettings();
+  const isPB = settings.active_theme === 'personalbrand';
+  const showPersonalityTabs = isPB && PB_SCOPED_SECTIONS.has(sectionKey);
+
   const schema = AUREX_SECTIONS[sectionKey];
+  // null = Global; 'business'|'lifestyle'|'personal' = PB mini-site tab
+  const [activeTab, setActiveTab] = useState(null);
+  // Track which tabs have at least a title saved (config) or at least one item
+  const [savedTabs, setSavedTabs] = useState(new Set());
   const [config, setConfig] = useState({});
   const [items, setItems] = useState([]);
   const [savingConfig, setSavingConfig] = useState(false);
@@ -164,22 +191,65 @@ function SectionEditor({ sectionKey }) {
   const [open, setOpen] = useState(false);
   const [savingItem, setSavingItem] = useState(false);
 
-  const loadAll = async () => {
+  // The personality param forwarded to all API calls for the active tab.
+  // null tab → no param (global); PB tabs → their key.
+  const tabPersonality = showPersonalityTabs ? activeTab : undefined;
+
+  const loadAll = async (personality) => {
     try {
-      const c = await adminAPI.getAurexConfig(sectionKey);
+      const c = await adminAPI.getAurexConfig(sectionKey, personality);
       setConfig(c.data || {});
       if (schema.itemFields) {
-        const it = await adminAPI.getAurexItems(sectionKey);
+        const it = await adminAPI.getAurexItems(sectionKey, personality);
         setItems(it.data || []);
+        // Mark as saved if any items exist OR the config has a title
+        if ((it.data || []).length > 0 || (c.data || {}).title) {
+          setSavedTabs(prev => new Set([...prev, personality ?? '__global__']));
+        }
+      } else if ((c.data || {}).title) {
+        setSavedTabs(prev => new Set([...prev, personality ?? '__global__']));
       }
     } catch (err) { toast.error(`Failed to load ${schema.label}`); }
   };
-  useEffect(() => { loadAll(); /* eslint-disable-next-line */ }, [sectionKey]);
+
+  // Reload when section key or active tab changes
+  useEffect(() => {
+    setConfig({});
+    setItems([]);
+    loadAll(tabPersonality);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionKey, activeTab]);
+
+  // Pre-check PB tabs for saved-state badges when personality tabs are visible
+  useEffect(() => {
+    if (!showPersonalityTabs) return;
+    const checkAll = async () => {
+      for (const tab of PB_SECTION_TABS) {
+        try {
+          const c = await adminAPI.getAurexConfig(sectionKey, tab.key);
+          const hasConfig = !!(c.data || {}).title;
+          let hasItems = false;
+          if (schema.itemFields) {
+            const it = await adminAPI.getAurexItems(sectionKey, tab.key);
+            hasItems = (it.data || []).length > 0;
+          }
+          if (hasConfig || hasItems) {
+            setSavedTabs(prev => new Set([...prev, tab.key ?? '__global__']));
+          }
+        } catch {}
+      }
+    };
+    checkAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showPersonalityTabs, sectionKey]);
 
   const handleSaveConfig = async () => {
     setSavingConfig(true);
-    try { await adminAPI.saveAurexConfig(sectionKey, config); toast.success('Saved'); }
-    catch (err) { toast.error(err.response?.data?.detail || 'Save failed'); }
+    try {
+      await adminAPI.saveAurexConfig(sectionKey, config, tabPersonality);
+      setSavedTabs(prev => new Set([...prev, tabPersonality ?? '__global__']));
+      toast.success(tabPersonality ? `Saved — PB ${tabPersonality}` : 'Saved');
+    } catch (err) { toast.error(err.response?.data?.detail || 'Save failed'); }
     finally { setSavingConfig(false); }
   };
 
@@ -187,8 +257,9 @@ function SectionEditor({ sectionKey }) {
     setSavingItem(true);
     try {
       if (editing?.id) await adminAPI.updateAurexItem(sectionKey, editing.id, editing);
-      else await adminAPI.createAurexItem(sectionKey, editing);
-      setOpen(false); setEditing(null); await loadAll();
+      else await adminAPI.createAurexItem(sectionKey, editing, tabPersonality);
+      setOpen(false); setEditing(null); await loadAll(tabPersonality);
+      setSavedTabs(prev => new Set([...prev, tabPersonality ?? '__global__']));
       toast.success('Saved');
     } catch (err) { toast.error(err.response?.data?.detail || 'Save failed'); }
     finally { setSavingItem(false); }
@@ -196,12 +267,12 @@ function SectionEditor({ sectionKey }) {
 
   const handleDelete = async (id, label) => {
     if (!window.confirm(`Delete "${label}"?`)) return;
-    try { await adminAPI.deleteAurexItem(sectionKey, id); toast.success('Deleted'); await loadAll(); }
+    try { await adminAPI.deleteAurexItem(sectionKey, id); toast.success('Deleted'); await loadAll(tabPersonality); }
     catch (err) { toast.error('Delete failed'); }
   };
 
   const toggleVisible = async (item) => {
-    try { await adminAPI.updateAurexItem(sectionKey, item.id, { ...item, visible: !(item.visible !== false) }); await loadAll(); }
+    try { await adminAPI.updateAurexItem(sectionKey, item.id, { ...item, visible: !(item.visible !== false) }); await loadAll(tabPersonality); }
     catch (err) { toast.error('Update failed'); }
   };
 
@@ -209,7 +280,7 @@ function SectionEditor({ sectionKey }) {
     try {
       // Strip server-managed fields so the backend assigns a fresh id + order.
       // eslint-disable-next-line no-unused-vars
-      const { id, order, section, _id, created_at, updated_at, ...rest } = item;
+      const { id, order, section, _id, created_at, updated_at, pb_personality, ...rest } = item;
       const clone = { ...rest, visible: item.visible !== false };
       // Append "(Copy)" to the first text-like field so the user can tell them apart.
       // Handle both legacy plain strings and localized {en, es, …} dicts.
@@ -225,9 +296,9 @@ function SectionEditor({ sectionKey }) {
           clone[nameField] = next;
         }
       }
-      await adminAPI.createAurexItem(sectionKey, clone);
+      await adminAPI.createAurexItem(sectionKey, clone, tabPersonality);
       toast.success('Duplicated');
-      await loadAll();
+      await loadAll(tabPersonality);
     } catch (err) { toast.error(err.response?.data?.detail || 'Duplicate failed'); }
   };
 
@@ -236,6 +307,55 @@ function SectionEditor({ sectionKey }) {
       <div className="mb-4">
         <p className="text-xs text-slate-500">{schema.description}</p>
       </div>
+
+      {/* ── Personal Brand personality tab strip ─────────────────────────── */}
+      {showPersonalityTabs && (
+        <div className="mb-5 border border-slate-200 rounded-sm bg-slate-50 p-4">
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            Content scope
+          </p>
+          <p className="text-xs text-slate-400 mb-3">
+            Each Personal Brand mini-site has its own independent content — section title, items, and all settings.
+            <span className="ml-1 font-medium text-slate-600">Global</span> is used by the Aurex One-page theme and as a fallback for any PB mini-site not yet configured.
+          </p>
+          <div className="flex flex-wrap gap-2" role="tablist">
+            {PB_SECTION_TABS.map(tab => {
+              const isActive = activeTab === tab.key;
+              const hasSaved = savedTabs.has(tab.key ?? '__global__');
+              return (
+                <button
+                  key={tab.key ?? '__global__'}
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-4 py-2 rounded-sm text-sm font-medium border-2 transition-colors ${
+                    isActive
+                      ? `bg-white shadow-sm ${tab.cls}`
+                      : 'text-slate-400 border-transparent hover:text-slate-600 hover:bg-white/60'
+                  }`}
+                  data-testid={`pb-team-tab-${tab.key ?? 'global'}`}
+                >
+                  {tab.label}
+                  {tab.key !== null && hasSaved  && <span className="ml-1.5 text-[10px] font-normal text-emerald-500">● configured</span>}
+                  {tab.key !== null && !hasSaved && <span className="ml-1.5 text-[10px] font-normal text-amber-500">● not set</span>}
+                </button>
+              );
+            })}
+          </div>
+          {activeTab && (
+            <p className="text-[11px] text-slate-400 mt-2">
+              {PB_SECTION_TABS.find(t => t.key === activeTab)?.hint}
+              {' — '}content here is exclusive to the <strong>{activeTab}</strong> mini-site.
+              Falls back to Global if left unconfigured.
+            </p>
+          )}
+          {!activeTab && (
+            <p className="text-[11px] text-slate-400 mt-2">
+              Global content — used by Aurex One-page and as a fallback for any PB mini-site not yet configured.
+            </p>
+          )}
+        </div>
+      )}
       {/* Config card */}
       <div className="rounded-lg border bg-white p-5 mb-6" style={{ borderColor: 'var(--ad-border, #e2e8f0)' }} data-testid={`config-form-${sectionKey}`}>
         <div className="flex items-center justify-between mb-3">
