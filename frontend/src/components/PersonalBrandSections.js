@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight, ArrowUpRight, Send, Loader2, Phone, BookOpen,
   Facebook, Instagram, Youtube, Github, Globe,
+  Check, X as XIcon, Calendar, Clock, ExternalLink,
 } from 'lucide-react';
 import * as lucide from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,6 +23,7 @@ import { Reveal } from './AurexSections';
 import { normalizeRichText } from '../lib/richText';
 import { useT } from '../lib/i18n';
 import { useLang, itemHasLocale } from '../lib/i18n';
+import { toLeftPct, toTopPct, effectStyle as heroEffectStyle, HERO_KEYFRAMES } from '../lib/heroCoords';
 import { contactAPI } from '../lib/api';
 import CaptchaWidget from './CaptchaWidget';
 import { useSettings } from '../App';
@@ -146,7 +148,20 @@ export function PBTicker({ phrases = [] }) {
 }
 
 // ─── 2. Hero ─────────────────────────────────────────────────────────────────
-// Full-bleed editorial photo, massive headline, 2-col bottom (text | desc+CTA)
+// Supports two rendering modes determined by slide.slide_type:
+//
+//   EDITORIAL (legacy / no slide_type):
+//     Fixed bottom-left 2-column layout with massive headline, parallax,
+//     ticker bar. The original Personal Brand Pro aesthetic.
+//
+//   POSITIONED (slide_type === 'photo' | 'video'):
+//     Elements are absolutely positioned on desktop using the canvas
+//     coordinates (title_x/y, subtitle_x/y, description_x/y, button_x/y,
+//     media_x/y) set via the drag-and-drop CMS canvas editor.
+//     Mobile always stacks vertically regardless of mode.
+//
+// The ticker bar and parallax background are shared across both modes.
+
 function countdownParts(target) {
   if (!target) return null;
   const diff = new Date(target).getTime() - Date.now();
@@ -157,6 +172,19 @@ function countdownParts(target) {
     mins: Math.floor((diff % 3600000) / 60000),
     secs: Math.floor((diff % 60000) / 1000),
   };
+}
+
+function resolveVideoEmbed(url) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?\s]+)/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  if (vm) return `https://player.vimeo.com/video/${vm[1]}`;
+  if (url.startsWith('<iframe')) {
+    const m = url.match(/src=["']([^"']+)["']/);
+    if (m) return m[1];
+  }
+  return url;
 }
 
 export function PBHero({ slides = [], tickerPhrases = [] }) {
@@ -190,29 +218,61 @@ export function PBHero({ slides = [], tickerPhrases = [] }) {
   const s = slides[idx];
   const bg = s.background || s.background_image || '';
   const parallax = Math.min(scrollY * 0.2, 100);
+  const speed = s.speed_per_layer || 400;
 
+  // Mode detection: 'photo' or 'video' slide_type → use canvas coordinates
+  const isPositioned = s.slide_type === 'photo' || s.slide_type === 'video';
+
+  // Shared CTA list (both modes)
   const ctas = [
     { text: s.button_text,   url: s.button_url,   target: s.window_open === 'new' ? '_blank' : '_self' },
     { text: s.button_2_text, url: s.button_2_url,  target: s.button_2_window_open === 'new' ? '_blank' : '_self' },
     { text: s.button_3_text, url: s.button_3_url,  target: s.button_3_window_open === 'new' ? '_blank' : '_self' },
   ].filter(c => tt(c.text));
 
+  // PB-styled CTA row (used in both modes)
+  const PBCtaRow = ({ size = 'md' }) => {
+    if (!ctas.length) return null;
+    const pad = size === 'sm' ? 'px-6 py-2.5 text-sm' : 'px-8 py-3 text-sm';
+    return (
+      <div className="flex flex-wrap gap-3" data-testid="pb-hero-ctas">
+        {ctas.map((c, i) => (
+          <a
+            key={i}
+            href={tt(c.url) || '#'}
+            target={c.target}
+            rel="noopener noreferrer"
+            className={`inline-flex items-center gap-2 rounded-full ${pad} font-bold transition-all duration-300 hover:gap-3`}
+            style={
+              i === 0
+                ? { backgroundColor: 'var(--color-button-bg)', color: 'var(--color-button-text)', border: '2px solid var(--color-button-bg)' }
+                : { backgroundColor: 'transparent', color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }
+            }
+            data-testid={`pb-hero-cta-${i}`}
+          >
+            {tt(c.text)} {i === 0 && <ArrowRight className="w-4 h-4" />}
+          </a>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div data-testid="pb-hero-wrapper" style={{ fontFamily: PB_FONT }}>
+      <style>{HERO_KEYFRAMES}</style>
       <PBTicker phrases={tickerPhrases} />
       <section
         className="pb-section relative overflow-hidden"
         data-testid="pb-hero-section"
-        style={{ minHeight: '92vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}
+        style={{ minHeight: '92vh', display: 'flex', flexDirection: 'column', justifyContent: isPositioned ? 'flex-start' : 'flex-end' }}
       >
-        {/* Parallax background */}
+        {/* Parallax background (shared) */}
         {bg && (
           <>
             <div
               className="absolute inset-0 bg-cover bg-center will-change-transform"
               style={{ backgroundImage: `url(${bg})`, transform: `translate3d(0, ${parallax}px, 0) scale(1.06)` }}
             />
-            {/* Strong dark overlay so white text pops */}
             <div
               className="absolute inset-0"
               style={{ background: 'linear-gradient(160deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.40) 100%)' }}
@@ -221,93 +281,254 @@ export function PBHero({ slides = [], tickerPhrases = [] }) {
         )}
         {!bg && <div className="absolute inset-0" style={{ backgroundColor: '#0f0f0f' }} />}
 
-        {/* Content */}
-        <div className="relative z-10 w-full px-6 sm:px-10 md:px-16 lg:px-24 pb-16 md:pb-24 pt-32">
-          {/* Eyebrow */}
-          {tt(s.subtitle) && (
-            <Reveal>
-              <p
-                className="text-sm font-semibold uppercase tracking-[0.25em] mb-6"
-                style={{ color: 'var(--color-primary)' }}
-                data-testid="pb-hero-eyebrow"
-              >
-                / {stripHtml(tt(s.subtitle))}
-              </p>
-            </Reveal>
-          )}
-
-          {/* 2-col bottom layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end max-w-7xl mx-auto w-full">
-            {/* Left — giant headline */}
-            <Reveal delay={80}>
-              {s.title && (
-                <h1
-                  className="font-black text-white leading-[0.93] tracking-tight"
-                  style={{ fontSize: 'clamp(52px, 8vw, 110px)', letterSpacing: '-0.02em' }}
+        {/* ── POSITIONED MODE (photo / video slides) ── */}
+        {isPositioned && (
+          <>
+            {/* Desktop lg+: honour CMS canvas coordinates */}
+            <div className="relative w-full hidden lg:block" style={{ minHeight: '80vh', color: '#ffffff' }}>
+              {/* Title */}
+              {tt(s.title) && (
+                <div
+                  className="absolute max-w-[55%]"
+                  style={{ left: toLeftPct(s.title_x, 100), top: toTopPct(s.title_y, 50), color: '#ffffff', ...heroEffectStyle(s.title_effect, s.title_start, speed) }}
                   data-testid="pb-hero-title"
                 >
-                  {tt(s.title)?.split('\n').map((line, i) => (
-                    <React.Fragment key={i}>
-                      {i > 0 && <br />}
-                      <span
-                        className={i > 0 ? 'font-light italic' : ''}
-                        style={i > 0 ? { color: 'rgba(255,255,255,0.75)' } : {}}
-                      >
-                        {line}
-                      </span>
-                    </React.Fragment>
-                  ))}
-                </h1>
+                  <h1
+                    className="font-black leading-tight"
+                    style={{ fontSize: 'clamp(36px, 5vw, 80px)', letterSpacing: '-0.02em', fontFamily: PB_FONT, color: '#ffffff' }}
+                    dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.title)) }}
+                  />
+                </div>
               )}
+
+              {/* Subtitle */}
+              {tt(s.subtitle) && (
+                <div
+                  className="absolute max-w-[55%]"
+                  style={{ left: toLeftPct(s.subtitle_x, 100), top: toTopPct(s.subtitle_y, 80), color: '#ffffff', ...heroEffectStyle(s.subtitle_effect, s.subtitle_start, speed) }}
+                  data-testid="pb-hero-subtitle"
+                >
+                  <div
+                    className="text-xl font-semibold leading-snug"
+                    style={{ fontFamily: PB_FONT, color: '#ffffff' }}
+                    dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.subtitle)) }}
+                  />
+                </div>
+              )}
+
+              {/* Description */}
+              {tt(s.description) && (
+                <div
+                  className="absolute max-w-[45%]"
+                  style={{ left: toLeftPct(s.description_x, 100), top: toTopPct(s.description_y, 120), color: 'rgba(255,255,255,0.82)', ...heroEffectStyle(s.description_effect, s.description_start, speed) }}
+                  data-testid="pb-hero-desc"
+                >
+                  <div
+                    className="text-base leading-relaxed rich-text-content"
+                    style={{ fontFamily: PB_FONT, color: 'rgba(255,255,255,0.82)' }}
+                    dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.description)) }}
+                  />
+                </div>
+              )}
+
+              {/* CTA buttons */}
+              {ctas.length > 0 && (
+                <div
+                  className="absolute"
+                  style={{ left: toLeftPct(s.button_x, 100), top: toTopPct(s.button_y, 180), ...heroEffectStyle(s.button_effect, s.button_start, speed) }}
+                >
+                  <PBCtaRow />
+                </div>
+              )}
+
+              {/* Countdown (positioned below buttons when present) */}
               {countdown && (
-                <div className="flex gap-8 mt-8">
+                <div
+                  className="absolute"
+                  style={{ left: toLeftPct(s.button_x, 100), top: `calc(${toTopPct(s.button_y, 180)} + 72px)`, ...heroEffectStyle(s.button_effect, (s.button_start || 0) + 100, speed) }}
+                >
+                  <div className="flex gap-8">
+                    {[['Days', countdown.days], ['Hours', countdown.hours], ['Min', countdown.mins], ['Sec', countdown.secs]].map(([lbl, n]) => (
+                      <div key={lbl}>
+                        <div className="text-3xl font-bold tabular-nums text-white">{String(n).padStart(2, '0')}</div>
+                        <div className="text-[10px] uppercase tracking-[0.25em] mt-1 text-white/50">{lbl}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Photo media */}
+              {s.slide_type === 'photo' && s.photo && (
+                <div
+                  className="absolute"
+                  style={{
+                    left: toLeftPct(s.media_x, 400),
+                    top: toTopPct(s.media_y, 50),
+                    width: s.media_width ? `${s.media_width}px` : '420px',
+                    ...heroEffectStyle(s.media_effect, s.media_start, speed),
+                  }}
+                >
+                  <img
+                    src={s.photo}
+                    alt=""
+                    className="rounded-2xl shadow-2xl w-full object-cover"
+                    style={{ maxHeight: s.media_height ? `${s.media_height}px` : '400px', filter: 'grayscale(5%)' }}
+                  />
+                </div>
+              )}
+
+              {/* Video media */}
+              {s.slide_type === 'video' && s.video_embed && (() => {
+                const embedUrl = resolveVideoEmbed(s.video_embed);
+                return embedUrl ? (
+                  <div
+                    className="absolute"
+                    style={{
+                      left: toLeftPct(s.media_x, 400),
+                      top: toTopPct(s.media_y, 50),
+                      width: s.media_width ? `${s.media_width}px` : '420px',
+                      ...heroEffectStyle(s.media_effect, s.media_start, speed),
+                    }}
+                  >
+                    <div className="rounded-2xl overflow-hidden shadow-2xl aspect-video" style={s.media_height ? { height: `${s.media_height}px`, aspectRatio: 'unset' } : {}}>
+                      <iframe
+                        src={embedUrl}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        frameBorder="0"
+                        title="Hero Video"
+                      />
+                    </div>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+
+            {/* Mobile: stacked flow layout */}
+            <div className="lg:hidden flex flex-col gap-6 px-6 sm:px-10 pb-16 pt-20 relative z-10" style={{ color: '#ffffff' }}>
+              {s.slide_type === 'photo' && s.photo && (
+                <div className="w-full max-w-sm mx-auto">
+                  <img src={s.photo} alt="" className="rounded-2xl shadow-2xl w-full object-cover max-h-[260px]" />
+                </div>
+              )}
+              {s.slide_type === 'video' && s.video_embed && (() => {
+                const embedUrl = resolveVideoEmbed(s.video_embed);
+                return embedUrl ? (
+                  <div className="w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl aspect-video">
+                    <iframe src={embedUrl} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen frameBorder="0" title="Hero Video" />
+                  </div>
+                ) : null;
+              })()}
+              {tt(s.subtitle) && (
+                <div
+                  className="text-lg font-semibold leading-snug"
+                  style={{ color: '#ffffff', fontFamily: PB_FONT }}
+                  data-testid="pb-hero-eyebrow"
+                  dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.subtitle)) }}
+                />
+              )}
+              {tt(s.title) && (
+                <h1
+                  className="font-black leading-tight"
+                  style={{ fontSize: 'clamp(32px, 7vw, 58px)', letterSpacing: '-0.02em', fontFamily: PB_FONT, color: '#ffffff' }}
+                  data-testid="pb-hero-title"
+                  dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.title)) }}
+                />
+              )}
+              {tt(s.description) && (
+                <div
+                  className="text-base leading-relaxed rich-text-content"
+                  style={{ color: 'rgba(255,255,255,0.82)' }}
+                  dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.description)) }}
+                  data-testid="pb-hero-desc"
+                />
+              )}
+              <PBCtaRow size="sm" />
+              {countdown && (
+                <div className="flex gap-6">
                   {[['Days', countdown.days], ['Hours', countdown.hours], ['Min', countdown.mins], ['Sec', countdown.secs]].map(([lbl, n]) => (
                     <div key={lbl}>
-                      <div className="text-4xl md:text-5xl font-bold tabular-nums text-white">{String(n).padStart(2, '0')}</div>
+                      <div className="text-3xl font-bold tabular-nums text-white">{String(n).padStart(2, '0')}</div>
                       <div className="text-[10px] uppercase tracking-[0.25em] mt-1 text-white/50">{lbl}</div>
                     </div>
                   ))}
                 </div>
               )}
-            </Reveal>
+            </div>
+          </>
+        )}
 
-            {/* Right — description + CTA */}
-            {(tt(s.description) || ctas.length > 0) && (
-              <Reveal delay={160}>
-                {tt(s.description) && (
-                  <div
-                    className="text-white/80 text-base md:text-lg leading-relaxed mb-8 rich-text-content"
-                    dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.description)) }}
-                    data-testid="pb-hero-desc"
-                  />
+        {/* ── EDITORIAL MODE (legacy / no slide_type) ── */}
+        {!isPositioned && (
+          <div className="relative z-10 w-full px-6 sm:px-10 md:px-16 lg:px-24 pb-16 md:pb-24 pt-32">
+            {/* Eyebrow */}
+            {tt(s.subtitle) && (
+              <Reveal>
+                <p
+                  className="text-sm font-semibold uppercase tracking-[0.25em] mb-6"
+                  style={{ color: 'var(--color-primary)' }}
+                  data-testid="pb-hero-eyebrow"
+                >
+                  / {stripHtml(tt(s.subtitle))}
+                </p>
+              </Reveal>
+            )}
+
+            {/* 2-col bottom layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-end max-w-7xl mx-auto w-full">
+              {/* Left — giant headline */}
+              <Reveal delay={80}>
+                {s.title && (
+                  <h1
+                    className="font-black text-white leading-[0.93] tracking-tight"
+                    style={{ fontSize: 'clamp(52px, 8vw, 110px)', letterSpacing: '-0.02em' }}
+                    data-testid="pb-hero-title"
+                  >
+                    {stripHtml(tt(s.title) || '').split('\n').map((line, i) => (
+                      <React.Fragment key={i}>
+                        {i > 0 && <br />}
+                        <span
+                          className={i > 0 ? 'font-light italic' : ''}
+                          style={i > 0 ? { color: 'rgba(255,255,255,0.75)' } : {}}
+                        >
+                          {line}
+                        </span>
+                      </React.Fragment>
+                    ))}
+                  </h1>
                 )}
-                {ctas.length > 0 && (
-                  <div className="flex flex-wrap gap-3" data-testid="pb-hero-ctas">
-                    {ctas.map((c, i) => (
-                      <a
-                        key={i}
-                        href={tt(c.url) || '#'}
-                        target={c.target}
-                        rel="noopener noreferrer"
-                        className={`inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold transition-all duration-300 hover:gap-3`}
-                        style={
-                          i === 0
-                            ? { backgroundColor: 'var(--color-button-bg)', color: 'var(--color-button-text)', border: '2px solid var(--color-button-bg)' }
-                            : { backgroundColor: 'transparent', color: '#fff', border: '2px solid rgba(255,255,255,0.6)' }
-                        }
-                        data-testid={`pb-hero-cta-${i}`}
-                      >
-                        {tt(c.text)} {i === 0 && <ArrowRight className="w-4 h-4" />}
-                      </a>
+                {countdown && (
+                  <div className="flex gap-8 mt-8">
+                    {[['Days', countdown.days], ['Hours', countdown.hours], ['Min', countdown.mins], ['Sec', countdown.secs]].map(([lbl, n]) => (
+                      <div key={lbl}>
+                        <div className="text-4xl md:text-5xl font-bold tabular-nums text-white">{String(n).padStart(2, '0')}</div>
+                        <div className="text-[10px] uppercase tracking-[0.25em] mt-1 text-white/50">{lbl}</div>
+                      </div>
                     ))}
                   </div>
                 )}
               </Reveal>
-            )}
-          </div>
-        </div>
 
-        {/* Slide indicators */}
+              {/* Right — description + CTA */}
+              {(tt(s.description) || ctas.length > 0) && (
+                <Reveal delay={160}>
+                  {tt(s.description) && (
+                    <div
+                      className="text-white/80 text-base md:text-lg leading-relaxed mb-8 rich-text-content"
+                      dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(s.description)) }}
+                      data-testid="pb-hero-desc"
+                    />
+                  )}
+                  <PBCtaRow />
+                </Reveal>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Slide indicators (shared) */}
         {slides.length > 1 && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {slides.map((_, i) => (
@@ -794,6 +1015,7 @@ export function PBPortfolio({ items = [], bg, cmsConfig = {}, sectionNumber }) {
         {/* Asymmetric 2-col grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {filtered.slice(0, 4).map((p, idx) => (
+
             <Reveal
               key={p.id}
               delay={idx * 80}
@@ -842,7 +1064,7 @@ export function PBPortfolio({ items = [], bg, cmsConfig = {}, sectionNumber }) {
           ))}
         </div>
 
-        {(filtered.length > 4 || tt(cmsConfig.cta_text)) && (
+        {tt(cmsConfig.cta_text) && (
           <Reveal delay={100} className="text-center mt-10">
             <Link
               to={tt(cmsConfig.cta_url) || '/featured-projects'}
@@ -852,7 +1074,7 @@ export function PBPortfolio({ items = [], bg, cmsConfig = {}, sectionNumber }) {
               style={{ border: '2px solid #111', color: '#111' }}
               data-testid="pb-portfolio-view-all"
             >
-              {tt(cmsConfig.cta_text) || 'View all projects'} <ArrowRight className="w-4 h-4" />
+              {tt(cmsConfig.cta_text)} <ArrowRight className="w-4 h-4" />
             </Link>
           </Reveal>
         )}
@@ -1148,16 +1370,18 @@ export function PBReadingList({ books = [], bg, cmsConfig = {}, sectionNumber })
               </p>
             )}
           </div>
-          <a
-            href={tt(cmsConfig.cta_url) || '/reading-list'}
-            target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold transition-all duration-300 pb-btn-hover"
-            style={{ border: '2px solid currentColor', backgroundColor: 'transparent' }}
-            data-testid="pb-reading-view-all"
-          >
-            {tt(cmsConfig.cta_text) || 'View all books'} <ArrowRight className="w-4 h-4" />
-          </a>
+          {tt(cmsConfig.cta_text) && (
+            <a
+              href={tt(cmsConfig.cta_url) || '/reading-list'}
+              target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold transition-all duration-300 pb-btn-hover"
+              style={{ border: '2px solid currentColor', backgroundColor: 'transparent' }}
+              data-testid="pb-reading-view-all"
+            >
+              {tt(cmsConfig.cta_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
         </Reveal>
 
         {/* Book grid */}
@@ -1229,17 +1453,19 @@ export function PBGallery({ items = [], bg, cmsConfig = {}, sectionNumber }) {
               <p className="mt-3 text-white/60 max-w-xl">{tt(cmsConfig.subtitle)}</p>
             )}
           </div>
-          <a
-            href={tt(cmsConfig.cta_url) || '/gallery'}
-            target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold border-2 border-white/30 text-white transition-all duration-300"
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-button-bg)'; e.currentTarget.style.color = 'var(--color-button-text)'; e.currentTarget.style.borderColor = 'var(--color-button-bg)'; }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
-            data-testid="pb-gallery-view-all"
-          >
-            {tt(cmsConfig.cta_text) || 'View all'} <ArrowRight className="w-4 h-4" />
-          </a>
+          {tt(cmsConfig.cta_text) && (
+            <a
+              href={tt(cmsConfig.cta_url) || '/gallery'}
+              target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold border-2 border-white/30 text-white transition-all duration-300"
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-button-bg)'; e.currentTarget.style.color = 'var(--color-button-text)'; e.currentTarget.style.borderColor = 'var(--color-button-bg)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+              data-testid="pb-gallery-view-all"
+            >
+              {tt(cmsConfig.cta_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
         </Reveal>
 
         {/* Gallery grid */}
@@ -1254,6 +1480,780 @@ export function PBGallery({ items = [], bg, cmsConfig = {}, sectionNumber }) {
                 onMouseEnter={e => (e.currentTarget.style.filter = 'grayscale(0%)')}
                 onMouseLeave={e => (e.currentTarget.style.filter = 'grayscale(20%)')}
               />
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── 10. Process — numbered steps, alternating layout ────────────────────────
+export function PBProcess({ config = {}, items = [], bg, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const sectionBg = bg || 'var(--color-bg, #fbf6ee)';
+  const visibleItems = items.filter(i => itemHasLocale(i.title, lang));
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-process"
+      data-testid="pb-process-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#111111', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        <Reveal className="mb-16">
+          <PBEyebrow number={sectionNumber} text={config.eyebrow || 'How it works'} />
+          {tt(config.title) && (
+            <h2
+              className="font-black tracking-tight leading-[1.0]"
+              style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+              data-testid="pb-process-title"
+            >
+              {tt(config.title)}
+            </h2>
+          )}
+          {tt(config.subtitle) && (
+            <p className="mt-3 text-base leading-relaxed" style={{ color: 'var(--color-body-text, #475569)' }}>
+              {tt(config.subtitle)}
+            </p>
+          )}
+        </Reveal>
+
+        <div className="relative">
+          {/* Vertical connector line */}
+          <div
+            className="hidden md:block absolute left-[3.25rem] top-6 bottom-6 w-px"
+            style={{ backgroundColor: 'var(--color-primary, #3a2517)', opacity: 0.12 }}
+          />
+          <div className="flex flex-col gap-10">
+            {visibleItems.map((step, idx) => (
+              <Reveal
+                key={step.id}
+                delay={idx * 100}
+                className="relative flex gap-8 items-start"
+                data-testid={`pb-process-step-${step.id}`}
+              >
+                {/* Step bubble */}
+                <div
+                  className="flex-shrink-0 w-[6.5rem] h-[6.5rem] rounded-2xl flex flex-col items-center justify-center text-white font-black z-10"
+                  style={{ backgroundColor: idx % 2 === 0 ? 'var(--color-primary, #3a2517)' : '#1a1a1a' }}
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] opacity-60 mb-0.5">Step</span>
+                  <span className="text-3xl leading-none">{String(step.step_number || (idx + 1)).padStart(2, '0')}</span>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 pt-2 pb-4 border-b" style={{ borderColor: 'rgba(0,0,0,0.06)' }}>
+                  <h3
+                    className="font-black mb-2 leading-tight"
+                    style={{ fontSize: 'clamp(20px, 2.5vw, 30px)', letterSpacing: '-0.01em' }}
+                  >
+                    {tt(step.title)}
+                  </h3>
+                  {tt(step.description) && (
+                    <div
+                      className="text-sm leading-relaxed rich-text-content"
+                      style={{ color: 'var(--color-body-text, #475569)' }}
+                      dangerouslySetInnerHTML={{ __html: normalizeRichText(tt(step.description)) }}
+                    />
+                  )}
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+
+        {tt(config.cta_text) && (
+          <Reveal delay={200} className="text-center mt-14">
+            <PBButton href={config.cta_url} text={config.cta_text} newTab={config.cta_new_tab} filled />
+          </Reveal>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ─── 11. Pricing — dark, 3-col cards, annual toggle ───────────────────────────
+function parsePBFeatures(raw) {
+  return String(raw || '').split(/\r?\n/).filter(Boolean).map(l => ({
+    included: !l.startsWith('✗') && !l.toLowerCase().startsWith('x '),
+    text: l.replace(/^✗\s*/, '').replace(/^x\s+/i, '').trim(),
+  }));
+}
+
+export function PBPricing({ config = {}, items = [], bg, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const sectionBg = bg || '#0f0f0f';
+  const [annual, setAnnual] = useState(false);
+  const visibleItems = items.filter(i => itemHasLocale(i.name, lang));
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-pricing"
+      data-testid="pb-pricing-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#ffffff', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        <Reveal className="mb-14">
+          <PBEyebrow number={sectionNumber} text={config.eyebrow || 'Investment'} />
+          {tt(config.title) && (
+            <h2
+              className="font-black text-white tracking-tight leading-[1.0]"
+              style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+              data-testid="pb-pricing-title"
+            >
+              {tt(config.title)}
+            </h2>
+          )}
+          {tt(config.subtitle) && (
+            <p className="mt-3 text-white/60 max-w-xl">{tt(config.subtitle)}</p>
+          )}
+        </Reveal>
+
+        {config.show_toggle && (
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex rounded-full p-1" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+              {['Monthly', 'Annual'].map((lbl, i) => (
+                <button
+                  key={lbl}
+                  onClick={() => setAnnual(i === 1)}
+                  className="px-6 py-2 rounded-full text-xs font-bold transition-all"
+                  style={annual === (i === 1)
+                    ? { backgroundColor: 'var(--color-button-bg, #3a2517)', color: 'var(--color-button-text, #fff)' }
+                    : { color: 'rgba(255,255,255,0.5)' }}
+                >
+                  {lbl}{i === 1 && <span className="ml-1.5 text-[9px] opacity-70">Save 20%</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className={`grid gap-6 ${visibleItems.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : visibleItems.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto' : 'grid-cols-1 md:grid-cols-3'}`}>
+          {visibleItems.map((plan, idx) => {
+            const price = annual ? (plan.price_annual || plan.price) : plan.price;
+            const features = parsePBFeatures(plan.features);
+            const featured = !!plan.is_featured;
+            return (
+              <Reveal
+                as="article"
+                delay={idx * 100}
+                key={plan.id}
+                className="rounded-2xl p-8 flex flex-col"
+                style={{
+                  backgroundColor: featured ? 'var(--color-primary, #3a2517)' : 'rgba(255,255,255,0.05)',
+                  border: featured ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                }}
+                data-testid={`pb-plan-card-${plan.id}`}
+              >
+                {plan.badge && (
+                  <span
+                    className="inline-block self-start px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-4"
+                    style={{ backgroundColor: featured ? 'rgba(255,255,255,0.2)' : 'var(--color-primary, #3a2517)', color: '#fff' }}
+                  >
+                    {tt(plan.badge)}
+                  </span>
+                )}
+                <h3 className="text-xl font-black text-white mb-4">{tt(plan.name)}</h3>
+                <div className="mb-6">
+                  <span className="text-5xl font-black text-white">{plan.currency || '$'}{price}</span>
+                  {plan.period && <span className="text-sm text-white/50 ml-1">{tt(plan.period)}</span>}
+                </div>
+                <ul className="flex-1 space-y-3 mb-8">
+                  {features.map((f, fi) => (
+                    <li key={fi} className={`flex items-start gap-2.5 text-sm ${!f.included ? 'opacity-40' : ''}`} style={{ color: featured ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.7)' }}>
+                      {f.included
+                        ? <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: featured ? '#fff' : 'var(--color-primary, #c08552)' }} />
+                        : <XIcon className="w-4 h-4 shrink-0 mt-0.5 text-white/30" />}
+                      <span className={f.included ? '' : 'line-through'}>{f.text}</span>
+                    </li>
+                  ))}
+                </ul>
+                {plan.cta_text && (
+                  <a
+                    href={tt(plan.cta_url) || '#'}
+                    target={plan.cta_new_tab ? '_blank' : '_self'}
+                    rel="noopener noreferrer"
+                    className="w-full text-center py-3 rounded-full text-sm font-bold transition-all duration-300 inline-flex items-center justify-center gap-2"
+                    style={featured
+                      ? { backgroundColor: '#fff', color: 'var(--color-primary, #3a2517)' }
+                      : { border: '2px solid rgba(255,255,255,0.3)', color: '#fff', backgroundColor: 'transparent' }}
+                    onMouseEnter={e => { if (!featured) { e.currentTarget.style.backgroundColor = 'var(--color-button-bg)'; e.currentTarget.style.borderColor = 'var(--color-button-bg)'; } }}
+                    onMouseLeave={e => { if (!featured) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; } }}
+                  >
+                    {tt(plan.cta_text)} <ArrowRight className="w-4 h-4" />
+                  </a>
+                )}
+              </Reveal>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── 12. Events — clean list with prominent dates ─────────────────────────────
+export function PBEvents({ config = {}, items = [], bg, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const sectionBg = bg || 'var(--color-bg, #fbf6ee)';
+  const visibleItems = items.filter(e => itemHasLocale(e.title, lang));
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-events"
+      data-testid="pb-events-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#111111', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6 mb-14">
+          <div>
+            <PBEyebrow number={sectionNumber} text={config.eyebrow || 'Upcoming events'} />
+            {tt(config.title) && (
+              <h2
+                className="font-black tracking-tight leading-[1.0]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+                data-testid="pb-events-title"
+              >
+                {tt(config.title)}
+              </h2>
+            )}
+            {tt(config.subtitle) && (
+              <p className="mt-2 text-base" style={{ color: 'var(--color-body-text, #475569)' }}>{tt(config.subtitle)}</p>
+            )}
+          </div>
+          {tt(config.view_all_text) && tt(config.view_all_url) && (
+            <a
+              href={tt(config.view_all_url)}
+              target={config.view_all_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold transition-all duration-300 pb-btn-hover"
+              style={{ border: '2px solid currentColor' }}
+              data-testid="pb-events-view-all"
+            >
+              {tt(config.view_all_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
+        </Reveal>
+
+        {visibleItems.length === 0 ? (
+          <p className="text-center text-sm" style={{ color: 'var(--color-body-text, #475569)' }}>
+            {tt(config.empty_message) || 'No upcoming events.'}
+          </p>
+        ) : (
+          <div className="flex flex-col">
+            {visibleItems.map((e, idx) => {
+              const d = new Date(`${e.date}T${e.start_time || '00:00'}`);
+              const day = String(d.getDate()).padStart(2, '0');
+              const month = d.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
+              const weekday = d.toLocaleDateString(undefined, { weekday: 'long' });
+              return (
+                <Reveal
+                  as="div"
+                  delay={idx * 80}
+                  key={e.id}
+                  className="flex items-center gap-6 md:gap-10 py-7 border-b flex-wrap md:flex-nowrap"
+                  style={{ borderColor: 'rgba(0,0,0,0.08)' }}
+                  data-testid={`pb-event-row-${e.id}`}
+                >
+                  {/* Date block */}
+                  <div
+                    className="flex-shrink-0 w-20 h-20 rounded-2xl flex flex-col items-center justify-center text-white"
+                    style={{ backgroundColor: idx % 3 === 0 ? 'var(--color-primary, #3a2517)' : idx % 3 === 1 ? '#1a1a1a' : 'var(--color-accent, #c08552)' }}
+                  >
+                    <span className="text-3xl font-black leading-none">{day}</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.2em] mt-0.5 opacity-70">{month}</span>
+                  </div>
+
+                  {/* Details */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--color-primary, #3a2517)' }}>
+                      ✳ {weekday}{e.location ? ` · ${e.location}` : ''}
+                    </p>
+                    <h3 className="font-black text-xl leading-tight truncate" style={{ letterSpacing: '-0.01em' }}>
+                      {tt(e.title)}
+                    </h3>
+                    {(e.start_time || e.end_time) && (
+                      <p className="text-sm mt-1 flex items-center gap-1.5" style={{ color: 'var(--color-body-text, #475569)' }}>
+                        <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                        {e.start_time}{e.end_time ? ` – ${e.end_time}` : ''}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* CTA */}
+                  <Link
+                    to={`/my-account/event/${e.id}`}
+                    className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-full px-6 py-2 text-xs font-bold transition-all duration-300 pb-btn-hover"
+                    style={{ border: '2px solid currentColor' }}
+                  >
+                    {tt(config.view_text) || 'Register'} <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </Reveal>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// ─── 13. Partners — dark marquee of logos ────────────────────────────────────
+export function PBPartners({ config = {}, items = [], bg, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const sectionBg = bg || '#0f0f0f';
+  const visibleItems = items.filter(i => itemHasLocale(i.name, lang));
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-partners"
+      data-testid="pb-partners-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#ffffff', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24 mb-12">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <PBEyebrow number={sectionNumber} text={config.eyebrow || 'Our partners'} />
+            {tt(config.title) && (
+              <h2
+                className="font-black text-white tracking-tight leading-[1.0]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+                data-testid="pb-partners-title"
+              >
+                {tt(config.title)}
+              </h2>
+            )}
+            {tt(config.subtitle) && (
+              <p className="mt-2 text-white/60">{tt(config.subtitle)}</p>
+            )}
+          </div>
+          {tt(config.cta_text) && tt(config.cta_url) && (
+            <a
+              href={tt(config.cta_url)}
+              target={config.cta_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold border-2 border-white/30 text-white transition-all duration-300"
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-button-bg)'; e.currentTarget.style.borderColor = 'var(--color-button-bg)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+              data-testid="pb-partners-cta"
+            >
+              {tt(config.cta_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
+        </Reveal>
+      </div>
+
+      {/* Dual-row logo marquee */}
+      <div className="overflow-hidden py-4 border-y" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+        {[0, 1].map(row => {
+          const sliced = row === 0 ? visibleItems : [...visibleItems].reverse();
+          const doubled = [...sliced, ...sliced];
+          const dir = row === 0 ? 'normal' : 'reverse';
+          return (
+            <div key={row} className={`flex gap-10 items-center ${row === 1 ? 'mt-5' : ''}`}
+              style={{ animation: `pb-marquee 32s linear infinite ${dir}`, width: 'max-content' }}>
+              {doubled.map((p, i) => {
+                const target = p.link_target === 'internal' ? '_self' : (p.link_target || '_blank');
+                const Wrap = p.link_url ? 'a' : 'span';
+                return (
+                  <Wrap
+                    key={`${p.id}-${i}`}
+                    href={p.link_url || undefined}
+                    target={p.link_url ? target : undefined}
+                    rel={p.link_url && target === '_blank' ? 'noreferrer' : undefined}
+                    className="flex-shrink-0 flex items-center gap-3"
+                    data-testid={`pb-partner-${p.id}`}
+                  >
+                    {p.logo_url ? (
+                      <img
+                        src={resolveImg(p.logo_url)}
+                        alt={tt(p.name)}
+                        className="h-8 w-auto object-contain"
+                        style={{ filter: 'grayscale(100%) brightness(2)' }}
+                        onMouseEnter={e => (e.currentTarget.style.filter = 'grayscale(0%) brightness(1)')}
+                        onMouseLeave={e => (e.currentTarget.style.filter = 'grayscale(100%) brightness(2)')}
+                      />
+                    ) : (
+                      <>
+                        <span className="text-xs font-black uppercase tracking-[0.25em] text-white/40">{tt(p.name)}</span>
+                        <span className="text-white/20 font-black text-lg">✦</span>
+                      </>
+                    )}
+                  </Wrap>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ─── 14. Clients — light marquee of client logos ──────────────────────────────
+export function PBClients({ config = {}, items = [], bg, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const sectionBg = bg || 'var(--color-bg, #fbf6ee)';
+  const visibleItems = items.filter(i => itemHasLocale(i.name, lang));
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-clients"
+      data-testid="pb-clients-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#111', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24 mb-12">
+        <Reveal>
+          <PBEyebrow number={sectionNumber} text={config.eyebrow || 'Our clients'} />
+          {tt(config.title) && (
+            <h2
+              className="font-black tracking-tight leading-[1.0]"
+              style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+              data-testid="pb-clients-title"
+            >
+              {tt(config.title)}
+            </h2>
+          )}
+          {tt(config.subtitle) && (
+            <p className="mt-2" style={{ color: 'var(--color-body-text, #475569)' }}>{tt(config.subtitle)}</p>
+          )}
+        </Reveal>
+      </div>
+
+      {/* Single-row logo marquee */}
+      <div className="overflow-hidden py-6 border-y" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+        <div
+          className="flex gap-14 items-center"
+          style={{ animation: 'pb-marquee 28s linear infinite', width: 'max-content' }}
+        >
+          {[...visibleItems, ...visibleItems].map((p, i) => {
+            const target = p.link_target === 'internal' ? '_self' : (p.link_target || '_blank');
+            const Wrap = p.link_url ? 'a' : 'span';
+            return (
+              <Wrap
+                key={`${p.id}-${i}`}
+                href={p.link_url || undefined}
+                target={p.link_url ? target : undefined}
+                rel={p.link_url && target === '_blank' ? 'noreferrer' : undefined}
+                className="flex-shrink-0"
+                data-testid={`pb-client-${p.id}`}
+              >
+                {p.logo_url ? (
+                  <img
+                    src={resolveImg(p.logo_url)}
+                    alt={tt(p.name)}
+                    className="h-10 w-auto object-contain"
+                    style={{ filter: 'grayscale(100%)' }}
+                    onMouseEnter={e => (e.currentTarget.style.filter = 'grayscale(0%)')}
+                    onMouseLeave={e => (e.currentTarget.style.filter = 'grayscale(100%)')}
+                  />
+                ) : (
+                  <span
+                    className="text-sm font-black uppercase tracking-[0.2em]"
+                    style={{ color: 'rgba(0,0,0,0.25)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-primary, #3a2517)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = 'rgba(0,0,0,0.25)'; }}
+                  >
+                    {tt(p.name)}
+                  </span>
+                )}
+              </Wrap>
+            );
+          })}
+        </div>
+      </div>
+
+      {tt(config.cta_text) && tt(config.cta_url) && (
+        <Reveal delay={120} className="text-center mt-10">
+          <PBButton href={config.cta_url} text={config.cta_text} newTab={config.cta_new_tab} />
+        </Reveal>
+      )}
+    </section>
+  );
+}
+
+// ─── 15. Video — full-width embed with optional header ────────────────────────
+function buildPBEmbedUrl(url) {
+  if (!url) return null;
+  const yt = url.match(/(?:youtube\.com\/(?:.*v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/);
+  if (yt) return `https://www.youtube.com/embed/${yt[1]}`;
+  const vm = url.match(/vimeo\.com\/(\d+)/);
+  if (vm) return `https://player.vimeo.com/video/${vm[1]}`;
+  return null;
+}
+
+export function PBVideo({ config = {}, bg, sectionNumber }) {
+  const tt = useT();
+  const sectionBg = bg || 'var(--color-bg, #fbf6ee)';
+  const url = config.video_url;
+  const embed = buildPBEmbedUrl(url);
+  const isDirect = url && !embed && /\.(mp4|webm|ogg)$/i.test(url);
+  if (!url) return null;
+
+  return (
+    <section
+      className="pb-section"
+      id="aurex-video"
+      data-testid="pb-video-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#111', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        {(config.eyebrow || config.title || config.subtitle || sectionNumber) && (
+          <Reveal className="text-center mb-12">
+            <PBEyebrow number={sectionNumber} text={config.eyebrow} />
+            {tt(config.title) && (
+              <h2
+                className="font-black tracking-tight leading-[1.0]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 60px)', letterSpacing: '-0.02em' }}
+                data-testid="pb-video-title"
+              >
+                {tt(config.title)}
+              </h2>
+            )}
+            {tt(config.subtitle) && (
+              <p className="mt-3 max-w-2xl mx-auto" style={{ color: 'var(--color-body-text, #475569)' }}>
+                {tt(config.subtitle)}
+              </p>
+            )}
+          </Reveal>
+        )}
+
+        <Reveal>
+          <div
+            className="relative rounded-2xl overflow-hidden shadow-2xl"
+            style={{ aspectRatio: config.aspect_ratio || '16/9', backgroundColor: '#0f0f0f' }}
+          >
+            {embed ? (
+              <iframe
+                src={embed}
+                className="absolute inset-0 w-full h-full"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={tt(config.title) || 'Video'}
+              />
+            ) : isDirect ? (
+              <video
+                src={url}
+                poster={config.poster_url || undefined}
+                controls={!config.autoplay}
+                autoPlay={!!config.autoplay}
+                muted={!!config.autoplay}
+                loop={!!config.autoplay}
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white/40 text-sm">
+                Unsupported video URL.
+              </div>
+            )}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+// ─── 16. News — PB-styled 3-col dark card grid ───────────────────────────────
+export function PBNews({ posts, bg, cmsConfig = {}, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const filtered = (posts || []).filter(p => itemHasLocale(p.title, lang));
+  if (!filtered.length) return null;
+  const sectionBg = bg || '#0f0f0f';
+
+  return (
+    <section
+      className="pb-section"
+      id="news"
+      data-testid="pb-news-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#ffffff', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6 mb-14">
+          <div>
+            <PBEyebrow number={sectionNumber} text={cmsConfig.eyebrow || 'Latest news'} />
+            {tt(cmsConfig.title) && (
+              <h2
+                className="font-black text-white tracking-tight leading-[1.0]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 58px)', letterSpacing: '-0.02em' }}
+                data-testid="pb-news-title"
+              >
+                {tt(cmsConfig.title)}
+              </h2>
+            )}
+            {tt(cmsConfig.subtitle) && (
+              <p className="mt-2 text-white/60">{tt(cmsConfig.subtitle)}</p>
+            )}
+          </div>
+          {tt(cmsConfig.cta_text) && (
+            <a
+              href={tt(cmsConfig.cta_url) || '/news'}
+              target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold border-2 border-white/30 text-white transition-all duration-300"
+              onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--color-button-bg)'; e.currentTarget.style.borderColor = 'var(--color-button-bg)'; }}
+              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'; }}
+              data-testid="pb-news-view-all"
+            >
+              {tt(cmsConfig.cta_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {filtered.slice(0, 3).map((p, idx) => (
+            <Reveal
+              as={Link}
+              delay={idx * 80}
+              to={`/news/${p.slug || p.id}`}
+              key={p.id}
+              className="group rounded-2xl overflow-hidden block"
+              style={{ backgroundColor: '#1a1a1a' }}
+              data-testid={`pb-news-card-${p.id}`}
+            >
+              {p.image && (
+                <div className="aspect-[16/10] overflow-hidden">
+                  <img
+                    src={resolveImg(p.image)}
+                    alt=""
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ filter: 'grayscale(15%)' }}
+                    onMouseEnter={e => (e.currentTarget.style.filter = 'grayscale(0%)')}
+                    onMouseLeave={e => (e.currentTarget.style.filter = 'grayscale(15%)')}
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]" style={{ color: 'var(--color-primary, #c08552)' }}>✳</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-white/40">
+                    {new Date(p.created_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
+                </div>
+                <h3 className="font-black text-white text-lg leading-tight mb-2 line-clamp-2 group-hover:opacity-80 transition-opacity"
+                  style={{ letterSpacing: '-0.01em' }}>
+                  {tt(p.title)}
+                </h3>
+                {(tt(p.summary) || tt(p.excerpt) || tt(p.content)) && (
+                  <p className="text-sm text-white/50 line-clamp-2 leading-relaxed">
+                    {(tt(p.summary) || tt(p.excerpt) || tt(p.content) || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').slice(0, 120)}
+                  </p>
+                )}
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── 17. Blog (external) — PB-styled light card grid ─────────────────────────
+export function PBBlog({ bg, cmsConfig = {}, sectionNumber }) {
+  const tt = useT();
+  const { lang } = useLang();
+  const { blog_api_url } = (typeof window !== 'undefined' ? {} : {});
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    import('../lib/api').then(({ blogExternalAPI }) => {
+      blogExternalAPI.getLatest().then(r => setPosts(r.data?.posts || [])).catch(() => {});
+    });
+  }, []);
+
+  const filtered = posts.filter(p => itemHasLocale(p.title, lang));
+  if (!filtered.length) return null;
+
+  const sectionBg = bg || 'var(--color-bg, #fbf6ee)';
+
+  return (
+    <section
+      className="pb-section"
+      id="blog"
+      data-testid="pb-blog-section"
+      style={{ backgroundColor: sectionBg, fontFamily: PB_FONT, color: '#111', paddingTop: '80px', paddingBottom: '80px' }}
+    >
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24">
+        <Reveal className="flex flex-wrap items-end justify-between gap-6 mb-14">
+          <div>
+            <PBEyebrow number={sectionNumber} text={cmsConfig.eyebrow || 'From the blog'} />
+            {tt(cmsConfig.title) && (
+              <h2
+                className="font-black tracking-tight leading-[1.0]"
+                style={{ fontSize: 'clamp(32px, 4.5vw, 58px)', letterSpacing: '-0.02em' }}
+                data-testid="pb-blog-title"
+              >
+                {tt(cmsConfig.title)}
+              </h2>
+            )}
+            {tt(cmsConfig.subtitle) && (
+              <p className="mt-2" style={{ color: 'var(--color-body-text, #475569)' }}>{tt(cmsConfig.subtitle)}</p>
+            )}
+          </div>
+          {tt(cmsConfig.cta_text) && (
+            <a
+              href={tt(cmsConfig.cta_url) || '#'}
+              target={cmsConfig.cta_new_tab ? '_blank' : '_self'}
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-7 py-2.5 text-sm font-bold transition-all duration-300 pb-btn-hover"
+              style={{ border: '2px solid currentColor' }}
+              data-testid="pb-blog-view-all"
+            >
+              {tt(cmsConfig.cta_text)} <ArrowRight className="w-4 h-4" />
+            </a>
+          )}
+        </Reveal>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {filtered.slice(0, 3).map((p, i) => (
+            <Reveal
+              as="a"
+              href={p.url || p.link}
+              target="_blank"
+              rel="noreferrer"
+              delay={i * 80}
+              key={i}
+              className="group rounded-2xl overflow-hidden block"
+              style={{ backgroundColor: '#ffffff', border: '1px solid rgba(0,0,0,0.08)' }}
+              data-testid={`pb-blog-card-${i}`}
+            >
+              {p.image && (
+                <div className="aspect-[16/10] overflow-hidden" style={{ backgroundColor: '#f3f4f6' }}>
+                  <img
+                    src={p.image}
+                    alt=""
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ filter: 'grayscale(10%)' }}
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <h3
+                  className="font-black text-lg leading-tight mb-2 flex items-center gap-1.5 group-hover:opacity-70 transition-opacity line-clamp-2"
+                  style={{ letterSpacing: '-0.01em', color: '#111' }}
+                >
+                  {p.title}
+                  <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 opacity-30" />
+                </h3>
+                {(p.summary || p.excerpt) && (
+                  <p className="text-sm line-clamp-2 leading-relaxed" style={{ color: 'var(--color-body-text, #475569)' }}>
+                    {p.summary || p.excerpt}
+                  </p>
+                )}
+              </div>
             </Reveal>
           ))}
         </div>

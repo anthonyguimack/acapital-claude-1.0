@@ -28,6 +28,8 @@ import { AUREX_FONTS, isAurexFamily, PERSONALBRAND_DEFAULTS, PB_FONT_CSS } from 
 import {
   PBHero, PBAbout, PBServices, PBAudience, PBPortfolio, PBTestimonials, PBTeam, PBContact,
   PBReadingList, PBGallery,
+  PBProcess, PBPricing, PBEvents, PBPartners, PBClients, PBVideo,
+  PBNews, PBBlog,
 } from '../components/PersonalBrandSections';
 import { BACKEND_URL as API } from '../lib/config';
 
@@ -734,7 +736,7 @@ export default function HomePage() {
         'aurex_team', 'testimonials', 'reading_list', 'aurex_events', 'news', 'blog',
         'aurex_partners', 'aurex_clients', 'map', 'locations', 'map_global',
         'map_conferences', 'map_recommended', 'portfolio', 'gallery', 'contact',
-        'aurex_video',
+        'aurex_video', 'aurex_news_cfg', 'aurex_blog_cfg',
       ];
       if (!knownKeys.includes(key)) return;
       counter++;
@@ -785,8 +787,12 @@ export default function HomePage() {
       : <ServicesSection key="services" services={services} theme={theme} />,
 
     // ── News / Blog / Reading / Map ──
-    news: isAurex ? <AurexNewsMono key="news" posts={posts} {...aurexMono('news')} /> : <NewsSection key="news" posts={posts} theme={theme} />,
-    blog: isAurex ? <AurexBlogMono key="blog" {...aurexMono('blog')} /> : <ExternalBlogSection key="blog" theme={theme} />,
+    news: isPersonalBrand
+      ? <PBNews key="news" posts={posts} {...aurexMono('news')} sectionNumber={pbSectionNumbers['news']} />
+      : isAurex ? <AurexNewsMono key="news" posts={posts} {...aurexMono('news')} /> : <NewsSection key="news" posts={posts} theme={theme} />,
+    blog: isPersonalBrand
+      ? <PBBlog key="blog" {...aurexMono('blog')} sectionNumber={pbSectionNumbers['blog']} />
+      : isAurex ? <AurexBlogMono key="blog" {...aurexMono('blog')} /> : <ExternalBlogSection key="blog" theme={theme} />,
     reading_list: isPersonalBrand
       ? <PBReadingList key="reading" books={books} {...aurexMono('reading_list')} sectionNumber={pbSectionNumbers['reading_list']} />
       : isAurex ? <AurexReadingMono key="reading" books={books} {...aurexMono('reading_list')} />
@@ -821,19 +827,43 @@ export default function HomePage() {
       : isAurex ? <AurexContactMono key="contact" contactSettings={settings.contact_settings} {...aurexMono('contact')} />
       : <ContactSection key="contact" theme={theme} contactSettings={settings.contact_settings} />,
 
-    // ── Aurex 2.0 sections — PB uses PBAudience + PBTeam, Aurex uses originals ──
+    // ── Aurex 2.0 sections — PB uses PB* variants, Aurex uses originals ──
     aurex_audience: isPersonalBrand
       ? <PBAudience key="aurex_audience" config={pbAudienceData.config} items={pbAudienceData.items} bg={pbAudienceCfg.bg_color} sectionNumber={pbSectionNumbers['aurex_audience']} />
       : aurexSection('aurex_audience', AurexAudience),
-    aurex_process: aurexSection('aurex_process', AurexProcess),
-    aurex_pricing: aurexSection('aurex_pricing', AurexPricing),
+    aurex_process: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_process'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_process'] || {};
+      return <PBProcess key="aurex_process" config={d.config || {}} items={d.items || []} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_process']} />;
+    })() : aurexSection('aurex_process', AurexProcess),
+    aurex_pricing: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_pricing'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_pricing'] || {};
+      return <PBPricing key="aurex_pricing" config={d.config || {}} items={d.items || []} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_pricing']} />;
+    })() : aurexSection('aurex_pricing', AurexPricing),
     aurex_team: isPersonalBrand
       ? <PBTeam key="aurex_team" config={pbTeamData.config} items={pbTeamData.items} bg={pbTeamCfg.bg_color} sectionNumber={pbSectionNumbers['aurex_team']} />
       : aurexSection('aurex_team', AurexTeam),
-    aurex_events: aurexSection('aurex_events', AurexEvents),
-    aurex_partners: aurexSection('aurex_partners', AurexPartners),
-    aurex_clients: aurexSection('aurex_clients', AurexClients),
-    aurex_video: aurexSection('aurex_video', AurexVideo),
+    aurex_events: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_events'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_events'] || {};
+      return <PBEvents key="aurex_events" config={d.config || {}} items={d.items || []} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_events']} />;
+    })() : aurexSection('aurex_events', AurexEvents),
+    aurex_partners: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_partners'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_partners'] || {};
+      return <PBPartners key="aurex_partners" config={d.config || {}} items={d.items || []} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_partners']} />;
+    })() : aurexSection('aurex_partners', AurexPartners),
+    aurex_clients: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_clients'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_clients'] || {};
+      return <PBClients key="aurex_clients" config={d.config || {}} items={d.items || []} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_clients']} />;
+    })() : aurexSection('aurex_clients', AurexClients),
+    aurex_video: isPersonalBrand ? (() => {
+      const d = aurexData['aurex_video'] || { config: {}, items: [] };
+      const cfg = aurexConfigs['aurex_video'] || {};
+      return <PBVideo key="aurex_video" config={d.config || {}} bg={cfg.bg_color} sectionNumber={pbSectionNumbers['aurex_video']} />;
+    })() : aurexSection('aurex_video', AurexVideo),
   };
 
   return (
