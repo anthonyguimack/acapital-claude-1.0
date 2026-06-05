@@ -809,7 +809,7 @@ export function PBServices({ services = [], bg, cmsConfig = {}, sectionNumber })
                   <div className="flex items-end justify-between mt-6 gap-4 flex-wrap">
                     {s.features && (
                       <ul className="flex flex-col gap-1.5">
-                        {String(s.features).split(/\r?\n/).filter(Boolean).slice(0, 4).map((f, fi) => (
+                        {String(tt(s.features) || '').split(/\r?\n/).filter(Boolean).slice(0, 4).map((f, fi) => (
                           <li key={fi} className="flex items-center gap-2 text-xs text-white/70">
                             <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--color-primary)' }} />
                             {f.trim()}
@@ -1035,9 +1035,9 @@ export function PBPortfolio({ items = [], bg, cmsConfig = {}, sectionNumber }) {
               {/* Dark gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
               {/* Brand overlay (center) */}
-              {p.client && (
+              {tt(p.client) && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-white font-black text-2xl md:text-3xl tracking-widest uppercase opacity-80">{p.client}</span>
+                  <span className="text-white font-black text-2xl md:text-3xl tracking-widest uppercase opacity-80">{tt(p.client)}</span>
                 </div>
               )}
               {/* Info below */}
@@ -1045,8 +1045,8 @@ export function PBPortfolio({ items = [], bg, cmsConfig = {}, sectionNumber }) {
                 <h3 className="text-white font-bold text-xl mb-1">{tt(p.title)}</h3>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--color-primary)' }}>
                   <span className="mr-1.5">✳</span>
-                  {p.category}
-                  {p.year && `, ${p.year}`}
+                  {tt(p.category)}
+                  {tt(p.year) && `, ${tt(p.year)}`}
                 </p>
               </div>
               {p.link && (
@@ -1635,8 +1635,11 @@ export function PBPricing({ config = {}, items = [], bg, sectionNumber }) {
 
         <div className={`grid gap-6 ${visibleItems.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : visibleItems.length === 2 ? 'grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto' : 'grid-cols-1 md:grid-cols-3'}`}>
           {visibleItems.map((plan, idx) => {
-            const price = annual ? (plan.price_annual || plan.price) : plan.price;
-            const features = parsePBFeatures(plan.features);
+            // price and currency are 'text' type in the schema → stored as localized
+            // objects when edited through the CMS. Always resolve through tt() so we
+            // never pass a raw {en:…} object as a React child (React error #31).
+            const price = tt(annual ? (plan.price_annual || plan.price) : plan.price);
+            const features = parsePBFeatures(tt(plan.features));
             const featured = !!plan.is_featured;
             return (
               <Reveal
@@ -1660,7 +1663,7 @@ export function PBPricing({ config = {}, items = [], bg, sectionNumber }) {
                 )}
                 <h3 className="text-xl font-black text-white mb-4">{tt(plan.name)}</h3>
                 <div className="mb-6">
-                  <span className="text-5xl font-black text-white">{plan.currency || '$'}{price}</span>
+                  <span className="text-5xl font-black text-white">{tt(plan.currency) || '$'}{price}</span>
                   {plan.period && <span className="text-sm text-white/50 ml-1">{tt(plan.period)}</span>}
                 </div>
                 <ul className="flex-1 space-y-3 mb-8">
@@ -1749,10 +1752,15 @@ export function PBEvents({ config = {}, items = [], bg, sectionNumber }) {
         ) : (
           <div className="flex flex-col">
             {visibleItems.map((e, idx) => {
-              const d = new Date(`${e.date}T${e.start_time || '00:00'}`);
-              const day = String(d.getDate()).padStart(2, '0');
-              const month = d.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
-              const weekday = d.toLocaleDateString(undefined, { weekday: 'long' });
+              // start_time / end_time / location might be stored as localized objects
+            // if a prior CMS save went through LocalizedField. Always coerce to string.
+            const startTime = tt(e.start_time) || '';
+            const endTime   = tt(e.end_time)   || '';
+            const location  = tt(e.location)   || '';
+            const d = new Date(`${e.date}T${startTime || '00:00'}`);
+              const day = isNaN(d.getDate()) ? '--' : String(d.getDate()).padStart(2, '0');
+              const month = isNaN(d.getTime()) ? '---' : d.toLocaleDateString(undefined, { month: 'short' }).toUpperCase();
+              const weekday = isNaN(d.getTime()) ? '' : d.toLocaleDateString(undefined, { weekday: 'long' });
               return (
                 <Reveal
                   as="div"
@@ -1774,15 +1782,15 @@ export function PBEvents({ config = {}, items = [], bg, sectionNumber }) {
                   {/* Details */}
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] mb-1" style={{ color: 'var(--color-primary, #3a2517)' }}>
-                      ✳ {weekday}{e.location ? ` · ${e.location}` : ''}
+                      ✳ {weekday}{location ? ` · ${location}` : ''}
                     </p>
                     <h3 className="font-black text-xl leading-tight truncate" style={{ letterSpacing: '-0.01em' }}>
                       {tt(e.title)}
                     </h3>
-                    {(e.start_time || e.end_time) && (
+                    {(startTime || endTime) && (
                       <p className="text-sm mt-1 flex items-center gap-1.5" style={{ color: 'var(--color-body-text, #475569)' }}>
                         <Clock className="w-3.5 h-3.5 flex-shrink-0" />
-                        {e.start_time}{e.end_time ? ` – ${e.end_time}` : ''}
+                        {startTime}{endTime ? ` – ${endTime}` : ''}
                       </p>
                     )}
                   </div>
@@ -2165,14 +2173,15 @@ export function PBNews({ posts, bg, cmsConfig = {}, sectionNumber }) {
 export function PBBlog({ bg, cmsConfig = {}, sectionNumber }) {
   const tt = useT();
   const { lang } = useLang();
-  const { blog_api_url } = (typeof window !== 'undefined' ? {} : {});
+  const settings = useSettings();
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
+    if (!settings.blog_api_url) return;
     import('../lib/api').then(({ blogExternalAPI }) => {
       blogExternalAPI.getLatest().then(r => setPosts(r.data?.posts || [])).catch(() => {});
     });
-  }, []);
+  }, [settings.blog_api_url]);
 
   const filtered = posts.filter(p => itemHasLocale(p.title, lang));
   if (!filtered.length) return null;
